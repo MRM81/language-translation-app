@@ -114,6 +114,12 @@ The language catalog was expanded from 10 to 37 languages in Sprint 009A. Three 
 
 Translation support, STT support, and TTS support are not assumed to be identical (D-071). The current catalog contains only languages with confirmed Azure support in all three areas. See `planning/sprints/009A-language-catalog-expansion/blueprint.md` for the full mapping tables.
 
+**Sprint 009B Capability Metadata:**
+
+`LanguageOptionDto` exposes `SupportsTextTranslation`, `SupportsSpeechToText`, and `SupportsTextToSpeech` boolean fields. All 37 current languages default to `true`. The frontend uses `supportsTextToSpeech` to conditionally disable the Play button in `ResultPanel` — `App.tsx` looks up the target language from the loaded catalog and passes the flag as a prop.
+
+Capability badges in the language `<select>` dropdown are deferred (native `<option>` does not support nested HTML; D-077).
+
 **Sprint 007 Azure TTS provider notes:**
 
 - `AzureTextToSpeechProvider` wraps `SpeechSynthesizer` (Microsoft.CognitiveServices.Speech 1.50.0). Uses `SpeechConfig.FromSubscription(Key, Region)` — same credentials as STT SDK path. Output format: `Audio24Khz96KBitRateMonoMp3` → `audio/mpeg`.

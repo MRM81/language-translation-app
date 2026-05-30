@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 009A (Language Catalog Expansion) is complete. Language catalog expanded from 10 to 37 languages. STT locale map and TTS voice map updated. 44 new catalog tests added. 115/115 tests pass. Build clean.
+Sprint 009B (Language Capability Metadata & Capability-Aware UI) is complete. Capability fields added to `LanguageOptionDto`. Frontend wired to derive TTS support per language and disable Play button when unsupported. 14 new integration tests. 129/129 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -11,11 +11,25 @@ Sprint 009A (Language Catalog Expansion) is complete. Language catalog expanded 
 
 ## Active Sprint
 
-None. Sprint 009A is complete. Recommended next sprint: Sprint 009B — Voice Playback & Language Capability Indicators.
+None. Sprint 009B is complete. Recommended next sprint: Sprint 010 — Deployment Prep.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 009B — Language Capability Metadata & Capability-Aware UI
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `LanguageOptionDto.cs` — added `SupportsTextTranslation`, `SupportsSpeechToText`, `SupportsTextToSpeech` (bool, default `true`)
+- `src/frontend/src/types/api.ts` — added 3 capability fields to `LanguageOption`
+- `src/frontend/src/App.tsx` — derives `targetLangSupportsTts` from loaded languages; passes to `ResultPanel`
+- `src/frontend/src/components/ResultPanel.tsx` — `targetLangSupportsTts` prop; Play button disabled with "Audio unavailable" when `false`
+- `LanguageCapabilityTests.cs` — 14 new integration tests via `GET /api/languages`
+- Dry run correctly identified voice playback as already complete (Sprint 007); no duplicate work done
+- D-074 to D-077 added; R-042 to R-044 added; Q-037 to Q-040 resolved
+- 129/129 tests pass; TypeScript clean; build clean
 
 ### Sprint 009A — Language Catalog Expansion
 Status: Completed
@@ -206,13 +220,13 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 009B — Voice Playback & Language Capability Indicators (expose TTS support per language in UI, capability badges).
-2. Sprint 010 — Deployment Prep (hosting target decision, CI/CD, production CORS, secrets management).
-3. Live Azure validation for Sprint 009A expanded languages (requires credentials — see acceptance.md).
+1. Sprint 010 — Deployment Prep (hosting target decision, CI/CD, production CORS, secrets management).
+2. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
+3. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
 
 ## Last Updated
 
-2026-05-31 (Sprint 009A complete — language catalog expanded to 37 languages)
+2026-05-31 (Sprint 009B complete — capability metadata and capability-aware UI delivered)
 
 ---
 

@@ -77,14 +77,30 @@ Return the list of supported source and target language codes and display names.
 | languages[].code | string | BCP-47 language code (e.g. `en`, `cs`, `zh-Hant`). |
 | languages[].name | string | Human-readable display name. |
 
-**Sprint 009A language catalog (37 entries, alphabetical by display name):**
+**Sprint 009A/B language catalog (37 entries, alphabetical by display name):**
 
 Arabic (`ar`), Bulgarian (`bg`), Croatian (`hr`), Czech (`cs`), Danish (`da`), Dutch (`nl`), English (`en`), Estonian (`et`), Finnish (`fi`), French (`fr`), German (`de`), Greek (`el`), Hindi (`hi`), Hungarian (`hu`), Indonesian (`id`), Italian (`it`), Japanese (`ja`), Korean (`ko`), Latvian (`lv`), Lithuanian (`lt`), Malay (`ms`), Norwegian (`nb`), Polish (`pl`), Portuguese (`pt`), Romanian (`ro`), Russian (`ru`), Serbian (`sr-Cyrl`), Slovak (`sk`), Slovenian (`sl`), Spanish (`es`), Swedish (`sv`), Thai (`th`), Turkish (`tr`), Ukrainian (`uk`), Vietnamese (`vi`), Chinese Simplified (`zh`), Chinese Traditional (`zh-Hant`).
+
+**Sprint 009B — Capability metadata added:**
+
+Each language entry now includes:
+
+```json
+{
+  "code": "cs",
+  "name": "Czech",
+  "supportsTextTranslation": true,
+  "supportsSpeechToText": true,
+  "supportsTextToSpeech": true
+}
+```
+
+All 37 current languages return `true` for all three flags. Future languages may set specific flags to `false` to indicate partial capability.
 
 **Notes:**
 - Language list is served by `StaticLanguageCatalogService` (Infrastructure layer). Frontend selectors are populated dynamically from this endpoint — no hardcoded list in the frontend.
 - Each language code maps to an Azure Translator code, an Azure Speech STT locale, and an Azure Speech TTS Neural voice. See `planning/sprints/009A-language-catalog-expansion/blueprint.md` for the full mapping tables.
-- The `LanguageOptionDto` carries `code` and `name` only. Capability indicators (Text/STT/TTS per language) are deferred to Sprint 009B (Q-034).
+- Capability badges inside `<select>` `<option>` elements are deferred (D-077). The Play button in the result area disables with "Audio unavailable" when `supportsTextToSpeech` is `false`.
 
 ---
 

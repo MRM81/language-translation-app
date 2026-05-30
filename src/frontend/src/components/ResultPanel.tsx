@@ -4,11 +4,12 @@ import type { ApiErrorResponse, TranslationResult } from '../types/api';
 
 interface Props {
   result: TranslationResult | null;
+  targetLangSupportsTts?: boolean;
 }
 
 type PlayState = 'idle' | 'loading' | 'playing' | 'error';
 
-export function ResultPanel({ result }: Props) {
+export function ResultPanel({ result, targetLangSupportsTts = true }: Props) {
   const [playState, setPlayState] = useState<PlayState>('idle');
   const [playError, setPlayError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -84,6 +85,7 @@ export function ResultPanel({ result }: Props) {
 
   const playIcon = playState === 'playing' ? '◼' : '▶';
   const playLabel =
+    !targetLangSupportsTts ? 'Audio unavailable' :
     playState === 'loading' ? 'Loading…' :
     playState === 'playing' ? 'Playing…' :
     'Play';
@@ -102,12 +104,12 @@ export function ResultPanel({ result }: Props) {
 
       <div className="result-play-row">
         <button
-          className={`play-button play-button--${playState}`}
-          onClick={handlePlay}
-          disabled={playState === 'loading' || playState === 'playing'}
-          aria-label="Play translated speech"
+          className={`play-button play-button--${targetLangSupportsTts ? playState : 'idle'}`}
+          onClick={targetLangSupportsTts ? handlePlay : undefined}
+          disabled={!targetLangSupportsTts || playState === 'loading' || playState === 'playing'}
+          aria-label={targetLangSupportsTts ? 'Play translated speech' : 'Audio unavailable for this language'}
         >
-          <span aria-hidden="true">{playIcon}</span>
+          {targetLangSupportsTts && <span aria-hidden="true">{playIcon}</span>}
           {playLabel}
         </button>
         {playState === 'error' && playError && (

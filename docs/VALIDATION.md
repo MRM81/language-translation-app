@@ -377,6 +377,29 @@ Language code validity is not validated against the catalog at the validation la
 
 ---
 
+## Sprint 009B — Capability Metadata Validation
+
+### Automated Tests (129/129 passing)
+
+`LanguageCapabilityTests.cs` covers (14 tests via `GET /api/languages` integration):
+- All languages have `supportsTextTranslation: true`.
+- All languages have `supportsSpeechToText: true`.
+- All languages have `supportsTextToSpeech: true`.
+- Czech, Slovak, German, Chinese (Simplified/Traditional), Dutch, Polish, Korean, Hindi — each confirmed with all capabilities.
+- `code` and `name` fields still present on all entries (non-breaking check).
+- All 37 languages carry capability metadata.
+
+### Manual Validation Checklist
+
+- [ ] `GET /api/languages` in browser returns all 37 entries with 5 fields each (`code`, `name`, `supportsTextTranslation`, `supportsSpeechToText`, `supportsTextToSpeech`).
+- [ ] Translate text → Play button is enabled and operative.
+- [ ] Simulate `supportsTextToSpeech: false` (manually edit a catalog entry) → Play button shows "Audio unavailable" and is disabled.
+- [ ] Restore catalog → Play button re-enables normally.
+- [ ] Responsive layout at 375px — Play button and result area usable.
+- [ ] Play button has accessible label (`aria-label`) confirmed via browser dev tools.
+
+---
+
 ## Sprint 009A — Language Catalog Expansion Validation
 
 ### Automated Tests (115/115 passing)

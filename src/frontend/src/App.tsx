@@ -81,7 +81,14 @@ export function App() {
           {error ? (
             <ErrorPanel error={error} />
           ) : (
-            <ResultPanel result={result} />
+            <ResultPanel
+              result={result}
+              targetLangSupportsTts={
+                result
+                  ? (languages.find(l => l.code === result.data.targetLanguage)?.supportsTextToSpeech ?? true)
+                  : true
+              }
+            />
           )}
         </div>
       </main>

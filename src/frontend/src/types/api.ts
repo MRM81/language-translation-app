@@ -4,6 +4,9 @@
 export interface LanguageOption {
   code: string;
   name: string;
+  supportsTextTranslation: boolean;
+  supportsSpeechToText: boolean;
+  supportsTextToSpeech: boolean;
 }
 
 export interface LanguageListResponse {
