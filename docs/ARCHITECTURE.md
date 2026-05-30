@@ -103,6 +103,17 @@ Application services depend only on these interfaces, not on any Azure SDK class
 | Google Cloud Translate + Speech | Alternative | Optional future |
 | DeepL | Alternative text translation | Optional future |
 
+**Sprint 009A Language Catalog:**
+
+The language catalog was expanded from 10 to 37 languages in Sprint 009A. Three maps are maintained in sync:
+
+- `StaticLanguageCatalogService` — app code → display name (served to frontend via `GET /api/languages`)
+- `AzureSpeechToTextProvider.LanguageMap` — app code → Azure Speech BCP-47 locale
+- `AzureTextToSpeechProvider.VoiceMap` — app code → Azure Neural voice name
+- `AzureTextToSpeechProvider.LocaleMap` — app code → locale for TTS fallback path
+
+Translation support, STT support, and TTS support are not assumed to be identical (D-071). The current catalog contains only languages with confirmed Azure support in all three areas. See `planning/sprints/009A-language-catalog-expansion/blueprint.md` for the full mapping tables.
+
 **Sprint 007 Azure TTS provider notes:**
 
 - `AzureTextToSpeechProvider` wraps `SpeechSynthesizer` (Microsoft.CognitiveServices.Speech 1.50.0). Uses `SpeechConfig.FromSubscription(Key, Region)` — same credentials as STT SDK path. Output format: `Audio24Khz96KBitRateMonoMp3` → `audio/mpeg`.
@@ -395,7 +406,9 @@ When introduced:
 | 005.2 | Audio Format Compatibility Fix | Complete — Compressed audio (MP3, WebM, OGG) routed to Fast Transcription REST API. GStreamer eliminated. AzureSpeech:Endpoint added. audio/ogg validation support added. 61 tests passing. |
 | 006 | Audio and Push-to-Talk | Full audio recording, upload, transcription, and translation flow end to end. |
 | 007 | TTS Playback | Complete — AzureTextToSpeechProvider, POST /api/translate/tts, ResultPanel Play button. 69 tests passing. |
-| 008+ | Polish, Testing, Deployment | Full validation test suite, mobile UX review, hosting setup. |
+| 008 | UX Modernization & Portfolio | Complete — dark navy theme, CSS custom properties, responsive layout, portfolio docs. 71 tests passing. |
+| 009A | Language Catalog Expansion | Complete — catalog expanded from 10 to 37 languages, STT/TTS maps updated, 44 new tests. 115 tests passing. |
+| 009B | Voice & Capability Indicators | Recommended next sprint. |
 
 Sprint numbers beyond 003 are indicative. Final scope for each sprint is defined by a future Architect Pack. Do not begin Sprint 003 until Sprint 002 is accepted.
 

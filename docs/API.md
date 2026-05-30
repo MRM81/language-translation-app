@@ -67,17 +67,24 @@ Accept a short recorded audio clip, transcribe it using speech-to-text, then tra
 
 Return the list of supported source and target language codes and display names.
 
-**Implemented:** Yes (Sprint 003 — StaticLanguageCatalogService returns 10 common language codes).
+**Implemented:** Yes. Sprint 003 introduced 10 languages. Sprint 009A expanded to 37 languages.
 
 **Response:**
 
 | Field | Type | Notes |
 |---|---|---|
 | languages | array | List of language objects. |
-| languages[].code | string | BCP-47 language code. |
+| languages[].code | string | BCP-47 language code (e.g. `en`, `cs`, `zh-Hant`). |
 | languages[].name | string | Human-readable display name. |
 
-**Notes:** Language list is derived from the configured provider. The exact list depends on provider choice (see planning/QUESTIONS.md Q-001 and Q-002).
+**Sprint 009A language catalog (37 entries, alphabetical by display name):**
+
+Arabic (`ar`), Bulgarian (`bg`), Croatian (`hr`), Czech (`cs`), Danish (`da`), Dutch (`nl`), English (`en`), Estonian (`et`), Finnish (`fi`), French (`fr`), German (`de`), Greek (`el`), Hindi (`hi`), Hungarian (`hu`), Indonesian (`id`), Italian (`it`), Japanese (`ja`), Korean (`ko`), Latvian (`lv`), Lithuanian (`lt`), Malay (`ms`), Norwegian (`nb`), Polish (`pl`), Portuguese (`pt`), Romanian (`ro`), Russian (`ru`), Serbian (`sr-Cyrl`), Slovak (`sk`), Slovenian (`sl`), Spanish (`es`), Swedish (`sv`), Thai (`th`), Turkish (`tr`), Ukrainian (`uk`), Vietnamese (`vi`), Chinese Simplified (`zh`), Chinese Traditional (`zh-Hant`).
+
+**Notes:**
+- Language list is served by `StaticLanguageCatalogService` (Infrastructure layer). Frontend selectors are populated dynamically from this endpoint — no hardcoded list in the frontend.
+- Each language code maps to an Azure Translator code, an Azure Speech STT locale, and an Azure Speech TTS Neural voice. See `planning/sprints/009A-language-catalog-expansion/blueprint.md` for the full mapping tables.
+- The `LanguageOptionDto` carries `code` and `name` only. Capability indicators (Text/STT/TTS per language) are deferred to Sprint 009B (Q-034).
 
 ---
 

@@ -14,30 +14,66 @@ public class AzureTextToSpeechProvider : ITextToSpeechProvider
     private readonly ILogger<AzureTextToSpeechProvider> _logger;
 
     // Maps app language codes to Azure Neural voice names.
-    // Covers the 10 languages in the static language catalog.
+    // Covers all 37 languages in the static language catalog.
     private static readonly Dictionary<string, string> VoiceMap =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            { "en",    "en-US-JennyNeural"      },
-            { "es",    "es-ES-ElviraNeural"     },
-            { "fr",    "fr-FR-DeniseNeural"     },
-            { "de",    "de-DE-KatjaNeural"      },
-            { "zh",    "zh-CN-XiaoxiaoNeural"   },
-            { "ja",    "ja-JP-NanamiNeural"     },
-            { "ar",    "ar-SA-ZariyahNeural"    },
-            { "pt",    "pt-BR-FranciscaNeural"  },
-            { "it",    "it-IT-ElsaNeural"       },
-            { "ru",    "ru-RU-SvetlanaNeural"   },
+            { "ar",      "ar-SA-ZariyahNeural"     },
+            { "bg",      "bg-BG-KalinaNeural"       },
+            { "hr",      "hr-HR-GabrijelaNeural"    },
+            { "cs",      "cs-CZ-VlastaNeural"       },
+            { "da",      "da-DK-ChristelNeural"     },
+            { "nl",      "nl-NL-FennaNeural"        },
+            { "en",      "en-US-JennyNeural"        },
+            { "et",      "et-EE-AnuNeural"          },
+            { "fi",      "fi-FI-NooraNeural"        },
+            { "fr",      "fr-FR-DeniseNeural"       },
+            { "de",      "de-DE-KatjaNeural"        },
+            { "el",      "el-GR-AthinaNeural"       },
+            { "hi",      "hi-IN-SwaraNeural"        },
+            { "hu",      "hu-HU-NoemiNeural"        },
+            { "id",      "id-ID-GadisNeural"        },
+            { "it",      "it-IT-ElsaNeural"         },
+            { "ja",      "ja-JP-NanamiNeural"       },
+            { "ko",      "ko-KR-SunHiNeural"        },
+            { "lv",      "lv-LV-EveritaNeural"      },
+            { "lt",      "lt-LT-OnaNeural"          },
+            { "ms",      "ms-MY-YasminNeural"       },
+            { "nb",      "nb-NO-PernilleNeural"     },
+            { "pl",      "pl-PL-AgnieszkaNeural"    },
+            { "pt",      "pt-BR-FranciscaNeural"    },
+            { "ro",      "ro-RO-AlinaNeural"        },
+            { "ru",      "ru-RU-SvetlanaNeural"     },
+            { "sr-Cyrl", "sr-RS-SophieNeural"       },
+            { "sk",      "sk-SK-ViktoriaNeural"     },
+            { "sl",      "sl-SI-PetraNeural"        },
+            { "es",      "es-ES-ElviraNeural"       },
+            { "sv",      "sv-SE-SofieNeural"        },
+            { "th",      "th-TH-PremwadeeNeural"    },
+            { "tr",      "tr-TR-EmelNeural"         },
+            { "uk",      "uk-UA-PolinaNeural"       },
+            { "vi",      "vi-VN-HoaiMyNeural"       },
+            { "zh",      "zh-CN-XiaoxiaoNeural"     },
+            { "zh-Hant", "zh-TW-HsiaoChenNeural"    },
         };
 
     // Maps short codes to full BCP-47 locales for the fallback path.
     private static readonly Dictionary<string, string> LocaleMap =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            { "en", "en-US" }, { "es", "es-ES" }, { "fr", "fr-FR" },
-            { "de", "de-DE" }, { "zh", "zh-CN" }, { "ja", "ja-JP" },
-            { "ar", "ar-SA" }, { "pt", "pt-BR" }, { "it", "it-IT" },
-            { "ru", "ru-RU" },
+            { "ar",      "ar-SA" }, { "bg",      "bg-BG" }, { "hr",      "hr-HR" },
+            { "cs",      "cs-CZ" }, { "da",      "da-DK" }, { "nl",      "nl-NL" },
+            { "en",      "en-US" }, { "et",      "et-EE" }, { "fi",      "fi-FI" },
+            { "fr",      "fr-FR" }, { "de",      "de-DE" }, { "el",      "el-GR" },
+            { "hi",      "hi-IN" }, { "hu",      "hu-HU" }, { "id",      "id-ID" },
+            { "it",      "it-IT" }, { "ja",      "ja-JP" }, { "ko",      "ko-KR" },
+            { "lv",      "lv-LV" }, { "lt",      "lt-LT" }, { "ms",      "ms-MY" },
+            { "nb",      "nb-NO" }, { "pl",      "pl-PL" }, { "pt",      "pt-BR" },
+            { "ro",      "ro-RO" }, { "ru",      "ru-RU" }, { "sr-Cyrl", "sr-RS" },
+            { "sk",      "sk-SK" }, { "sl",      "sl-SI" }, { "es",      "es-ES" },
+            { "sv",      "sv-SE" }, { "th",      "th-TH" }, { "tr",      "tr-TR" },
+            { "uk",      "uk-UA" }, { "vi",      "vi-VN" }, { "zh",      "zh-CN" },
+            { "zh-Hant", "zh-TW" },
         };
 
     public AzureTextToSpeechProvider(

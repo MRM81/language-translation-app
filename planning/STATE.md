@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 008 (UX Modernization, Mobile Responsiveness & Portfolio Showcase) is complete. Dark navy theme, CSS custom properties, language swap button, circular record button, hero result display, responsive improvements, accessibility fixes, portfolio documentation, and design documentation all delivered. 71/71 tests pass. TypeScript clean. Build clean.
+Sprint 009A (Language Catalog Expansion) is complete. Language catalog expanded from 10 to 37 languages. STT locale map and TTS voice map updated. 44 new catalog tests added. 115/115 tests pass. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -11,11 +11,24 @@ Sprint 008 (UX Modernization, Mobile Responsiveness & Portfolio Showcase) is com
 
 ## Active Sprint
 
-None. Sprint 008 is complete. Recommended next sprint: Sprint 009 — Deployment Prep.
+None. Sprint 009A is complete. Recommended next sprint: Sprint 009B — Voice Playback & Language Capability Indicators.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 009A — Language Catalog Expansion
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `StaticLanguageCatalogService.cs` — expanded from 10 to 37 languages, alphabetical order
+- `AzureSpeechToTextProvider.cs` — `LanguageMap` expanded from 10 to 37 entries
+- `AzureTextToSpeechProvider.cs` — `VoiceMap` and `LocaleMap` expanded from 10 to 37 entries
+- `LanguageCatalogTests.cs` — new test file, 44 tests covering catalog size, uniqueness, all new languages
+- D-070 to D-073 added; R-038 to R-041 added; Q-034 to Q-036 added
+- 115/115 tests pass; build clean; no frontend changes required
+- Live Azure validation pending (requires credentials)
 
 ### Sprint 008 — UX Modernization, Mobile Responsiveness & Portfolio Showcase
 Status: Completed
@@ -193,12 +206,13 @@ Outcomes:
 
 ## Next Actions
 
-1. Architect Sprint 009 — Deployment Prep (hosting target decision, CI/CD, production CORS, secrets management for deployment).
-2. Optionally validate Edge and Firefox push-to-talk + TTS playback (R-031 — voice availability on resource).
+1. Sprint 009B — Voice Playback & Language Capability Indicators (expose TTS support per language in UI, capability badges).
+2. Sprint 010 — Deployment Prep (hosting target decision, CI/CD, production CORS, secrets management).
+3. Live Azure validation for Sprint 009A expanded languages (requires credentials — see acceptance.md).
 
 ## Last Updated
 
-2026-05-30 (Sprint 008 complete — all acceptance criteria met)
+2026-05-31 (Sprint 009A complete — language catalog expanded to 37 languages)
 
 ---
 

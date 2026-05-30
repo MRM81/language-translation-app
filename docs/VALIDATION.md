@@ -374,3 +374,38 @@ Language code validity is not validated against the catalog at the validation la
 - [ ] Click Play while audio is already playing → previous audio stops, new audio starts.
 - [ ] POST `/api/translate/tts` with empty text → HTTP 400, `VALIDATION_ERROR`.
 - [ ] No secrets or user content appear in logs.
+
+---
+
+## Sprint 009A — Language Catalog Expansion Validation
+
+### Automated Tests (115/115 passing)
+
+`LanguageCatalogTests.cs` covers:
+- Catalog contains exactly 37 languages.
+- All codes and names are non-empty.
+- All codes are unique; all names are unique.
+- All 10 original languages are present with correct names.
+- Czech (`cs`), Slovak (`sk`), German (`de`) pass acceptance criterion assertions.
+- Chinese (Simplified) label is "Chinese (Simplified)".
+- Chinese Traditional (`zh-Hant`) is present.
+- All 18 European expansion languages are present with correct names.
+- All 6 global expansion languages are present with correct names.
+
+### Manual Validation Checklist (Requires Azure Credentials)
+
+- [ ] `GET /api/languages` returns 37 languages with correct codes and display names.
+- [ ] Frontend language selector shows all 37 languages in alphabetical order.
+- [ ] Selector is usable on mobile (320px, 375px viewport).
+- [ ] Text translation: English → Czech returns a correct Czech translation.
+- [ ] Text translation: English → Slovak returns a correct Slovak translation.
+- [ ] Text translation: English → German returns a correct German translation.
+- [ ] Text translation: English → Chinese (Simplified) returns correct result.
+- [ ] Text translation: Czech → English returns a correct English translation.
+- [ ] TTS playback: Czech (`cs-CZ-VlastaNeural`) produces audio.
+- [ ] TTS playback: Slovak (`sk-SK-ViktoriaNeural`) produces audio.
+- [ ] TTS playback: German (`de-DE-KatjaNeural`) produces audio.
+- [ ] TTS playback: Chinese Simplified (`zh-CN-XiaoxiaoNeural`) produces audio.
+- [ ] Push-to-talk STT: at least one expanded language transcribes correctly.
+- [ ] Existing English, Spanish, French workflows still work end-to-end.
+- [ ] No secrets or user content appear in logs.
