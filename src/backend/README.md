@@ -53,6 +53,7 @@ dotnet user-secrets set "AzureTranslator:Key" "YOUR_REAL_TRANSLATOR_KEY"
 dotnet user-secrets set "AzureTranslator:Region" "YOUR_REGION"
 dotnet user-secrets set "AzureSpeech:Key" "YOUR_REAL_SPEECH_KEY"
 dotnet user-secrets set "AzureSpeech:Region" "YOUR_REGION"
+dotnet user-secrets set "AzureSpeech:Endpoint" "https://YOUR_RESOURCE_NAME.cognitiveservices.azure.com"
 dotnet user-secrets set "Translation:Provider" "Azure"
 ```
 
@@ -180,6 +181,7 @@ Expected:
 | `AzureTranslator:Endpoint` | `https://api.cognitive.microsofttranslator.com/` | Azure Translator endpoint |
 | `AzureTranslator:Region` | (placeholder) | Azure region. Set via User Secrets or env var. |
 | `AzureTranslator:Key` | (placeholder) | Azure Translator API key. **Never commit.** |
+| `AzureSpeech:Endpoint` | (placeholder) | Azure AI Services base URL. Example: `https://my-resource.cognitiveservices.azure.com`. Required for Fast Transcription API (compressed audio). |
 | `AzureSpeech:Region` | (placeholder) | Azure Speech region. Set via User Secrets or env var. |
 | `AzureSpeech:Key` | (placeholder) | Azure Speech API key. **Never commit.** |
 

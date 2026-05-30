@@ -10,14 +10,17 @@ using MyTranslationApp.Infrastructure.Providers.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Local development CORS — allows the Vite dev server to call the backend without browser blocking.
-// This is intentionally scoped to the local dev origin only and is not a production CORS policy.
-const string localDevCorsPolicy = "LocalDevCors";
+// CORS — origins are read from AllowedCorsOrigins in configuration so production can
+// set the real frontend domain without code changes. Default covers the Vite dev server.
+const string corsPolicy = "ConfiguredCors";
+var allowedOrigins = builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(localDevCorsPolicy, policy =>
+    options.AddPolicy(corsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -98,9 +101,13 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.Logger.LogInformation("Provider mode: {Provider}", providerName);
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseCors(localDevCorsPolicy);
+app.UseCors(corsPolicy);
+
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.MapControllers();
 

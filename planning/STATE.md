@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 009B (Language Capability Metadata & Capability-Aware UI) is complete. Capability fields added to `LanguageOptionDto`. Frontend wired to derive TTS support per language and disable Play button when unsupported. 14 new integration tests. 129/129 tests pass. TypeScript clean. Build clean.
+Sprint 010 (Deployment Readiness Hardening) is complete. Health endpoint added, CORS made config-driven, startup log added, `appsettings.Production.json` created, three deployment docs written, README gap fixed. 133/133 tests pass. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -11,11 +11,26 @@ Sprint 009B (Language Capability Metadata & Capability-Aware UI) is complete. Ca
 
 ## Active Sprint
 
-None. Sprint 009B is complete. Recommended next sprint: Sprint 010 — Deployment Prep.
+None. Sprint 010 is complete. Recommended next sprint: Sprint 011 — Conversation Mode (per Architect Pack) or hosting target decision sprint.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 010 — Deployment Readiness Hardening
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `Program.cs` — `GET /health` endpoint; config-driven CORS (`AllowedCorsOrigins`); startup `Provider mode:` log
+- `appsettings.json` — `AllowedCorsOrigins` default; `AzureSpeech:Endpoint` placeholder
+- `appsettings.Production.json` — new file: `Translation:Provider=Azure`, Warning log levels
+- `launchSettings.json` — stale `launchUrl: "swagger"` removed
+- `src/backend/README.md` — `AzureSpeech:Endpoint` added to User Secrets setup and config table
+- `HealthEndpointTests.cs` — 4 new integration tests
+- `docs/DEPLOYMENT.md`, `docs/ENVIRONMENTS.md`, `docs/OPERATIONS.md` — created
+- D-078 to D-081 added; R-045 to R-047 added; Q-041 to Q-044 added
+- 133/133 tests pass; build clean
 
 ### Sprint 009B — Language Capability Metadata & Capability-Aware UI
 Status: Completed
@@ -220,13 +235,14 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 010 — Deployment Prep (hosting target decision, CI/CD, production CORS, secrets management).
-2. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
-3. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
+1. Decide hosting target (Q-041) — Azure App Service, container, static web app, or other.
+2. Sprint 011 — Conversation Mode (per Architect Pack 010 recommendation) or hosting implementation sprint.
+3. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
+4. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
 
 ## Last Updated
 
-2026-05-31 (Sprint 009B complete — capability metadata and capability-aware UI delivered)
+2026-05-31 (Sprint 010 complete — deployment readiness hardening delivered)
 
 ---
 
