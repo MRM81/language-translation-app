@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 010 (Deployment Readiness Hardening) is complete. Health endpoint added, CORS made config-driven, startup log added, `appsettings.Production.json` created, three deployment docs written, README gap fixed. 133/133 tests pass. Build clean.
+Sprint 011 (AWS Deployment Preparation) is complete. Frontend API base URL made configurable (`VITE_API_BASE_URL`), `.env.production.example` added, AWS deployment and architecture docs created, existing docs updated with AWS-specific guidance. 133/133 tests pass. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -11,11 +11,25 @@ Sprint 010 (Deployment Readiness Hardening) is complete. Health endpoint added, 
 
 ## Active Sprint
 
-None. Sprint 010 is complete. Recommended next sprint: Sprint 011 — Conversation Mode (per Architect Pack) or hosting target decision sprint.
+None. Sprint 011 is complete. Recommended next sprint: Sprint 012 — AWS Production Deployment (live deployment to AWS).
 
 ---
 
 ## Completed Sprints
+
+### Sprint 011 — AWS Deployment Preparation
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/api/translationApi.ts` — `API_BASE` reads `import.meta.env.VITE_API_BASE_URL ?? ''` (1-line fix that unblocks separate-origin AWS deployment)
+- `src/frontend/.env.production.example` — documents `VITE_API_BASE_URL` for production builds
+- `.gitignore` — `.env.production.example` allowed
+- `docs/AWS_DEPLOYMENT.md` — full AWS deployment guide (EB + S3 + CloudFront, CORS, health check, rollback, cost)
+- `docs/AWS_ARCHITECTURE.md` — architecture diagram, cross-cloud rationale, environment variable reference
+- `docs/DEPLOYMENT.md`, `docs/ENVIRONMENTS.md`, `docs/OPERATIONS.md` — AWS sections added
+- D-082 to D-085 added; R-048 to R-051 added; Q-041 resolved; Q-045 to Q-047 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 010 — Deployment Readiness Hardening
 Status: Completed
@@ -235,14 +249,15 @@ Outcomes:
 
 ## Next Actions
 
-1. Decide hosting target (Q-041) — Azure App Service, container, static web app, or other.
-2. Sprint 011 — Conversation Mode (per Architect Pack 010 recommendation) or hosting implementation sprint.
-3. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
-4. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
+1. Sprint 012 — AWS Production Deployment (actual deployment using docs from Sprint 011).
+2. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
+3. Decide custom domain (Q-046) — Route 53 + ACM certificate.
+4. Consider CI/CD after first manual deployment succeeds (Q-047).
+5. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
 
 ## Last Updated
 
-2026-05-31 (Sprint 010 complete — deployment readiness hardening delivered)
+2026-05-31 (Sprint 011 complete — AWS deployment preparation delivered)
 
 ---
 

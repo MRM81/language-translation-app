@@ -221,6 +221,36 @@ When investigating a reported issue, ask the user for the `correlationId` from t
 
 ---
 
+## AWS-Specific Operations Notes
+
+### Elastic Beanstalk Health Check
+
+EB's default health check targets `GET /` which returns 404. Configure the health check path to `/health` in the EB environment:
+
+**AWS Console:** EB Environment → Configuration → Load balancer → Processes → Edit default process → **Health check path: `/health`**
+
+The `/health` endpoint returns HTTP 200 with `{ "status": "healthy" }` regardless of Azure provider status. This is intentional — a connectivity check would require Azure credentials in the probe path.
+
+### CORS and CloudFront
+
+If the browser shows `Access-Control-Allow-Origin` errors when the frontend is on CloudFront:
+
+1. Verify `AllowedCorsOrigins__0` on EB matches the exact CloudFront domain (including `https://`).
+2. Verify the CloudFront **Origin request policy** is configured to forward the `Origin` header to the backend. Without this, `OPTIONS` preflight requests fail silently.
+3. Restart the EB environment after changing `AllowedCorsOrigins`.
+
+### EB Startup Log
+
+In EB console → **Logs** → **Request last 100 lines**, look for:
+
+```
+Provider mode: Azure
+```
+
+If this line is absent, the application has not started or started in Mock mode. Check that `Translation__Provider=Azure` and all Azure credential env vars are set.
+
+---
+
 ## Deployment Verification Checklist
 
 After each deployment:

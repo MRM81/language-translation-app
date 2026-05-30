@@ -1,8 +1,19 @@
 # Deployment Guide
 
 **Project:** My Translation App
-**Sprint:** 010 — Deployment Preparation
+**Sprint:** 010 — Deployment Preparation (updated Sprint 011)
 **Date:** 2026-05-31
+
+---
+
+## AWS Deployment
+
+**The recommended deployment target is AWS.** See the AWS-specific guides:
+
+- [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) — Step-by-step AWS deployment (S3 + CloudFront + Elastic Beanstalk)
+- [docs/AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md) — Architecture diagram, component rationale, environment variable reference
+
+The sections below document the general build and configuration approach applicable to any hosting target.
 
 ---
 

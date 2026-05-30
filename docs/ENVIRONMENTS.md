@@ -149,6 +149,33 @@ Placeholder values (e.g. `DO_NOT_COMMIT_REAL_KEY`) are non-empty and pass startu
 
 ---
 
+## AWS Environment Variables
+
+When deploying to Elastic Beanstalk, set configuration values as EB environment properties using `__` (double underscore) as the hierarchy separator. EB environment properties are set in the AWS console under **Configuration → Software → Environment properties**.
+
+### Required EB environment properties
+
+```
+ASPNETCORE_ENVIRONMENT = Production
+ASPNETCORE_URLS        = http://+:5000
+Translation__Provider  = Azure
+
+AzureTranslator__Key      = <secret — do not commit>
+AzureTranslator__Region   = eastus
+
+AzureSpeech__Key          = <secret — do not commit>
+AzureSpeech__Region       = eastus
+AzureSpeech__Endpoint     = https://your-resource.cognitiveservices.azure.com
+
+AllowedCorsOrigins__0     = https://your-cloudfront-domain.cloudfront.net
+```
+
+`ASPNETCORE_URLS=http://+:5000` is required because EB's nginx reverse proxy forwards to port 5000, but the backend development default is port 5074. This environment variable overrides Kestrel's listen address for production.
+
+See [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the full step-by-step AWS guide.
+
+---
+
 ## AllowedHosts
 
 `AllowedHosts: "*"` in `appsettings.json` allows any host header. For production, consider restricting this to the known domain via an environment variable or `appsettings.Production.json` override, depending on the hosting platform's reverse proxy configuration.

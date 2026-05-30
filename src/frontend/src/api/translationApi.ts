@@ -6,9 +6,10 @@ import type {
   TextTranslationResponse,
 } from '../types/api';
 
-// All API calls route through the Vite dev server proxy (/api -> http://localhost:5074).
-// In production builds, the backend base URL must be configured appropriately.
-const API_BASE = '';
+// In development, VITE_API_BASE_URL is unset and the Vite proxy forwards /api/* to the backend.
+// In production (S3+CloudFront + Elastic Beanstalk), set VITE_API_BASE_URL to the EB backend URL
+// at build time so that API calls reach the correct domain. See src/frontend/.env.production.example.
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 async function parseResponse<T>(res: Response): Promise<T> {
   const body = await res.json();
