@@ -1,0 +1,742 @@
+/* ===== CSS CUSTOM PROPERTIES ===== */
+
+:root {
+  --bg:              #0d1117;
+  --surface:         #161b2e;
+  --surface-raised:  #1e2540;
+  --border:          rgba(255, 255, 255, 0.08);
+  --border-strong:   rgba(255, 255, 255, 0.16);
+  --accent:          #6366f1;
+  --accent-hover:    #4f46e5;
+  --accent-active:   #4338ca;
+  --success:         #10b981;
+  --error:           #ef4444;
+  --warning:         #f59e0b;
+  --text-primary:    #f0f0f5;
+  --text-secondary:  #94a3b8;
+  --text-muted:      #64748b;
+  --radius-sm:       6px;
+  --radius-md:       10px;
+  --radius-lg:       16px;
+  --radius-full:     9999px;
+}
+
+/* ===== RESET ===== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== BASE ===== */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ===== FOCUS VISIBLE ===== */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== LAYOUT ===== */
+
+.app-header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b2e 55%, #1e1b4b 100%);
+  color: var(--text-primary);
+  padding: 2rem 1.5rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.app-header p {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin-top: 0.4rem;
+}
+
+.app-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.forms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .forms-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.results-area {
+  margin-top: 1.5rem;
+}
+
+/* ===== STATUS BANNERS ===== */
+
+.status-banner {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.status-banner.loading {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.status-banner.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+/* ===== FORMS / CARDS ===== */
+
+.translation-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.translation-form h2 {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ===== FIELDS ===== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.field select,
+.field textarea,
+.field input[type='file'] {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  transition: border-color 0.15s;
+}
+
+.field select {
+  appearance: auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.field select:disabled,
+.field textarea:disabled,
+.field input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Option text in dark selects */
+.field select option {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.char-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.char-count.over-limit {
+  color: var(--error);
+  font-weight: 500;
+}
+
+/* ===== LANGUAGE PAIR ROW ===== */
+
+.lang-pair-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.lang-pair-row .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-swap {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+.btn-swap:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.btn-swap:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ===== VALIDATION MESSAGES ===== */
+
+.inline-error {
+  font-size: 0.875rem;
+  color: var(--error);
+  font-weight: 500;
+}
+
+.inline-warning {
+  font-size: 0.8rem;
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.6rem;
+}
+
+/* ===== PRIMARY BUTTON ===== */
+
+.btn-primary {
+  padding: 0.65rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--accent-active);
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== RESULT PANEL ===== */
+
+.panel {
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.panel-empty {
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.panel-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--success);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.panel-error {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--error);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Hero translation text */
+.result-hero {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  padding: 0.5rem 0 1rem;
+  word-break: break-word;
+}
+
+/* Secondary label above hero (e.g. "Transcript") */
+.result-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* Transcript text block */
+.result-transcript {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+}
+
+/* Meta row (provider, correlation ID) */
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.result-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.result-meta-item code {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: var(--surface-raised);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+/* Kept for backward compat — used for language rows */
+.result-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.result-label {
+  width: 120px;
+  flex-shrink: 0;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.result-value {
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.result-translation {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ===== ERROR PANEL TEXT ===== */
+
+.panel-error > p {
+  font-size: 0.9rem;
+  color: #fca5a5;
+  margin-bottom: 0.5rem;
+}
+
+.error-details {
+  list-style: none;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.error-details li {
+  padding: 0.2rem 0;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.meta code {
+  font-family: monospace;
+  background: var(--surface-raised);
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+code {
+  font-family: monospace;
+  font-size: 0.85em;
+  background: var(--surface-raised);
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+/* ===== AUDIO INPUT TABS ===== */
+
+.audio-tabs {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.audio-tab {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  background: var(--surface-raised);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.audio-tab + .audio-tab {
+  border-left: 1px solid var(--border-strong);
+}
+
+.audio-tab:hover:not(:disabled):not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.audio-tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.audio-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== TAB PANEL ===== */
+
+.audio-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ===== RECORD CONTROLS ===== */
+
+.record-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+}
+
+/* ===== RECORD BUTTON — CIRCULAR ===== */
+
+.btn-record {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+  border: 3px solid rgba(99, 102, 241, 0.35);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.btn-record:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: scale(1.06);
+  box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.15);
+}
+
+.btn-record:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-record:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-stop-recording {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--error);
+  color: #fff;
+  border: 3px solid rgba(239, 68, 68, 0.35);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+  animation: stop-pulse 2s ease-in-out infinite;
+}
+
+@keyframes stop-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+  50%       { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+
+.btn-stop-recording:hover {
+  background: #dc2626;
+  transform: scale(1.06);
+}
+
+/* Mic icon label inside record buttons */
+.btn-record-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+/* ===== RECORDING INDICATOR ===== */
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--error);
+}
+
+.recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--error);
+  flex-shrink: 0;
+  animation: dot-pulse 1s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* ===== RECORDING TIMER ===== */
+
+.recording-timer {
+  font-size: 0.875rem;
+  font-family: monospace;
+  color: var(--text-secondary);
+  min-width: 4ch;
+}
+
+.recording-timer.near-limit {
+  color: var(--error);
+  font-weight: 700;
+}
+
+/* ===== TTS PLAY BUTTON ===== */
+
+.result-play-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.play-button {
+  padding: 0.55rem 1.1rem;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+}
+
+.play-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+}
+
+.play-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.play-button--loading {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.play-button--playing {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.play-button--error {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.play-error {
+  font-size: 0.85rem;
+  color: var(--error);
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 1.5rem 1rem 1.25rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .app-main {
+    padding: 1.25rem 0.875rem;
+  }
+
+  .translation-form {
+    padding: 1.25rem;
+  }
+
+  .lang-pair-row {
+    gap: 0.375rem;
+  }
+
+  .record-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .result-meta {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .result-hero {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .btn-record,
+  .btn-stop-recording {
+    width: 64px;
+    height: 64px;
+  }
+}

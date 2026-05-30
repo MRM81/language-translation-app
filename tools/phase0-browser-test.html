@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 0 — Browser Audio Validation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; font-size: 15px; line-height: 1.5; color: #1a1a1a; background: #f5f5f5; padding: 1.5rem; }
+    h1 { font-size: 1.2rem; color: #1a1a2e; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 1.5rem; }
+    section { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+    h2 { font-size: 0.95rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.75rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 0.25rem; }
+    input[type="text"] { width: 100%; max-width: 400px; padding: 0.45rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; font-family: inherit; }
+    .field { margin-bottom: 0.75rem; }
+    .field:last-child { margin-bottom: 0; }
+    button { padding: 0.5rem 1rem; background: #1a1a2e; color: #fff; border: none; border-radius: 5px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
+    button:hover:not(:disabled) { background: #2d2d5e; }
+    button:disabled { background: #bbb; cursor: not-allowed; }
+    button.danger { background: #c62828; }
+    button.danger:hover:not(:disabled) { background: #a31818; }
+    pre { background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 0.75rem; font-size: 0.8rem; font-family: monospace; white-space: pre-wrap; word-break: break-word; margin-top: 0.5rem; min-height: 2rem; }
+    .status { font-size: 0.875rem; margin-top: 0.5rem; padding: 0.4rem 0.6rem; border-radius: 4px; }
+    .status.idle    { background: #f0f0f0; color: #555; }
+    .status.ok      { background: #d4edda; color: #155724; }
+    .status.error   { background: #f8d7da; color: #721c24; }
+    .status.warning { background: #fff3cd; color: #856404; }
+    .status.recording { background: #fce8e6; color: #c62828; font-weight: 600; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    audio { display: block; margin-top: 0.5rem; width: 100%; max-width: 500px; }
+    textarea { width: 100%; font-family: monospace; font-size: 0.8rem; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
+    .badge { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600; margin-left: 0.4rem; }
+    .badge.supported    { background: #d4edda; color: #155724; }
+    .badge.unsupported  { background: #f8d7da; color: #721c24; }
+    .badge.selected     { background: #cce5ff; color: #004085; }
+    .mime-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-family: monospace; padding: 0.2rem 0; }
+    .instructions { font-size: 0.82rem; color: #555; background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; }
+    .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<h1>Phase 0 — Browser Audio Validation</h1>
+<p class="subtitle">Sprint 006 prerequisite. Validates Chrome MediaRecorder → <code>/api/translate/audio</code> → Azure Fast Transcription pipeline. Complete all steps and copy the report at the bottom.</p>
+
+<!-- Step 1: Configure -->
+<section>
+  <h2>Step 1 — Configure</h2>
+  <p class="instructions">Ensure the backend is running in <strong>Azure mode</strong> with real credentials before proceeding. Default backend URL: <code>http://localhost:5074</code>.</p>
+  <div class="field">
+    <label for="backendUrl">Backend URL</label>
+    <input type="text" id="backendUrl" value="http://localhost:5074" />
+  </div>
+  <div class="field">
+    <label for="targetLang">Target Language (BCP-47 code, e.g. <code>es</code>)</label>
+    <input type="text" id="targetLang" value="es" />
+  </div>
+  <div class="field">
+    <label for="sourceLang">Source Language (BCP-47 code, or leave blank for auto)</label>
+    <input type="text" id="sourceLang" value="en" />
+  </div>
+  <div class="row">
+    <button id="pingBtn" onclick="pingBackend()">Ping Backend</button>
+  </div>
+  <div id="pingStatus" class="status idle">Not checked.</div>
+</section>
+
+<!-- Step 2: MIME Detection -->
+<section>
+  <h2>Step 2 — Detect MIME Types</h2>
+  <p class="instructions">Checks which audio formats this browser supports via <code>MediaRecorder.isTypeSupported()</code>. The first supported type in the preference list will be used for recording.</p>
+  <button onclick="detectMimeTypes()">Detect Supported MIME Types</button>
+  <div id="mimeResults" style="margin-top:0.5rem;"></div>
+</section>
+
+<!-- Step 3: Record -->
+<section>
+  <h2>Step 3 — Record Audio</h2>
+  <p class="instructions">Click <strong>Start Recording</strong>, say a short phrase (e.g. "Hello, how are you?"), then click <strong>Stop Recording</strong>. Maximum 30 seconds.</p>
+  <div class="row">
+    <button id="startBtn" onclick="startRecording()">Start Recording</button>
+    <button id="stopBtn" onclick="stopRecording()" disabled class="danger">Stop Recording</button>
+  </div>
+  <div id="recordStatus" class="status idle">Status: Idle</div>
+  <div id="timer" style="font-size:0.85rem;color:#666;margin-top:0.25rem;"></div>
+</section>
+
+<!-- Step 4: Review -->
+<section>
+  <h2>Step 4 — Review Recording</h2>
+  <div id="blobInfo" class="status idle">No recording yet.</div>
+  <audio id="playback" controls style="display:none;"></audio>
+</section>
+
+<!-- Step 5: Submit -->
+<section>
+  <h2>Step 5 — Submit to /api/translate/audio</h2>
+  <p class="instructions">Submits the recording as multipart/form-data to the backend, exactly as the production push-to-talk flow will. Inspect the request details before confirming.</p>
+  <div id="requestPreview" class="status idle">No recording ready to submit.</div>
+  <div class="row" style="margin-top:0.75rem;">
+    <button id="submitBtn" onclick="submitRecording()" disabled>Submit to Backend</button>
+  </div>
+  <div id="submitStatus" class="status idle" style="margin-top:0.5rem;">Not submitted.</div>
+</section>
+
+<!-- Step 6: Response -->
+<section>
+  <h2>Step 6 — Backend Response</h2>
+  <div id="httpStatus" class="status idle">Awaiting submission.</div>
+  <pre id="responseOutput">—</pre>
+</section>
+
+<!-- Step 7: Report -->
+<section>
+  <h2>Step 7 — Phase 0 Report</h2>
+  <p class="instructions">After completing Steps 1–6, click <strong>Generate Report</strong> to produce the validation data. Copy and paste this into the project Phase 0 Validation Report.</p>
+  <div class="row">
+    <button onclick="generateReport()">Generate Report</button>
+    <button onclick="copyReport()">Copy Report</button>
+  </div>
+  <textarea id="reportOutput" rows="30" readonly placeholder="Report will appear here after Steps 1–6 are complete."></textarea>
+</section>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  const MIME_PREFERENCE = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/ogg;codecs=opus',
+    'audio/ogg',
+  ];
+
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let recordedBlob = null;
+  let selectedMime = null;
+  let timerInterval = null;
+  let elapsedSeconds = 0;
+  let MAX_SECONDS = 30;
+
+  const log = {
+    browser: navigator.userAgent,
+    timestamp: null,
+    pingResult: null,
+    mimeDetection: [],
+    selectedMime: null,
+    blobSize: null,
+    blobSizeKb: null,
+    requestContentType: null,
+    httpStatus: null,
+    httpStatusText: null,
+    correlationId: null,
+    responseBody: null,
+    transcript: null,
+    translation: null,
+    provider: null,
+    errorMessage: null,
+  };
+
+  // ── Step 1: Ping ───────────────────────────────────────────────────────────
+  async function pingBackend() {
+    const url = document.getElementById('backendUrl').value.trim();
+    const el = document.getElementById('pingStatus');
+    el.className = 'status idle';
+    el.textContent = 'Pinging…';
+    try {
+      const res = await fetch(`${url}/api/languages`);
+      const data = await res.json();
+      const count = data?.languages?.length ?? 0;
+      el.className = 'status ok';
+      el.textContent = `Backend reachable. Languages endpoint returned ${count} language(s). Status ${res.status}.`;
+      log.pingResult = `OK — HTTP ${res.status}, ${count} languages`;
+    } catch (e) {
+      el.className = 'status error';
+      el.textContent = `Backend unreachable: ${e.message}. Is the backend running in Azure mode?`;
+      log.pingResult = `FAIL — ${e.message}`;
+    }
+  }
+
+  // ── Step 2: MIME Detection ─────────────────────────────────────────────────
+  function detectMimeTypes() {
+    const container = document.getElementById('mimeResults');
+    container.innerHTML = '';
+    log.mimeDetection = [];
+
+    if (!window.MediaRecorder) {
+      container.innerHTML = '<div class="status error">MediaRecorder is not available in this browser.</div>';
+      return;
+    }
+
+    let firstSupported = null;
+    MIME_PREFERENCE.forEach((mime) => {
+      const supported = MediaRecorder.isTypeSupported(mime);
+      if (supported && !firstSupported) firstSupported = mime;
+      const row = document.createElement('div');
+      row.className = 'mime-row';
+      const badge = document.createElement('span');
+      badge.className = `badge ${supported ? 'supported' : 'unsupported'}`;
+      badge.textContent = supported ? 'supported' : 'not supported';
+      row.appendChild(document.createTextNode(mime));
+      row.appendChild(badge);
+      if (supported && mime === firstSupported) {
+        const sel = document.createElement('span');
+        sel.className = 'badge selected';
+        sel.textContent = 'SELECTED';
+        row.appendChild(sel);
+      }
+      container.appendChild(row);
+      log.mimeDetection.push({ mime, supported });
+    });
+
+    if (firstSupported) {
+      selectedMime = firstSupported;
+      log.selectedMime = firstSupported;
+      const note = document.createElement('div');
+      note.className = 'status ok';
+      note.style.marginTop = '0.5rem';
+      note.textContent = `Selected MIME type: ${firstSupported}`;
+      container.appendChild(note);
+      console.log('[Phase0] Selected MIME type:', firstSupported);
+    } else {
+      selectedMime = null;
+      log.selectedMime = 'NONE — browser not supported';
+      const note = document.createElement('div');
+      note.className = 'status error';
+      note.style.marginTop = '0.5rem';
+      note.textContent = 'No supported MIME type found. This browser cannot record audio for this test.';
+      container.appendChild(note);
+    }
+  }
+
+  // ── Step 3: Record ─────────────────────────────────────────────────────────
+  async function startRecording() {
+    if (!selectedMime) {
+      alert('Run Step 2 (MIME detection) first.');
+      return;
+    }
+
+    recordedChunks = [];
+    recordedBlob = null;
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('blobInfo').className = 'status idle';
+    document.getElementById('blobInfo').textContent = 'No recording yet.';
+    document.getElementById('playback').style.display = 'none';
+
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      const el = document.getElementById('recordStatus');
+      el.className = 'status error';
+      el.textContent = `Microphone permission error: ${e.message}`;
+      return;
+    }
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType: selectedMime });
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+    };
+    mediaRecorder.onstop = onRecordingStopped;
+    mediaRecorder.start(100);
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('recordStatus').className = 'status recording';
+    document.getElementById('recordStatus').textContent = 'Recording… speak now.';
+
+    elapsedSeconds = 0;
+    timerInterval = setInterval(() => {
+      elapsedSeconds++;
+      document.getElementById('timer').textContent = `${elapsedSeconds}s elapsed`;
+      if (elapsedSeconds >= MAX_SECONDS) stopRecording();
+    }, 1000);
+
+    console.log('[Phase0] Recording started. MIME:', selectedMime);
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    }
+    clearInterval(timerInterval);
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('recordStatus').className = 'status ok';
+    document.getElementById('recordStatus').textContent = 'Recording stopped. Processing…';
+    document.getElementById('timer').textContent = '';
+  }
+
+  function onRecordingStopped() {
+    // Strip codec parameters to get the base MIME type for the blob and Content-Type header.
+    const baseMime = selectedMime.split(';')[0].trim();
+    recordedBlob = new Blob(recordedChunks, { type: baseMime });
+    log.blobSize = recordedBlob.size;
+    log.blobSizeKb = (recordedBlob.size / 1024).toFixed(1);
+    log.requestContentType = baseMime;
+
+    console.log('[Phase0] Recording complete. Blob size:', recordedBlob.size, 'MIME:', recordedBlob.type);
+
+    const blobEl = document.getElementById('blobInfo');
+    blobEl.className = 'status ok';
+    blobEl.textContent = `Blob ready. Size: ${log.blobSizeKb} KB. Type: ${baseMime}.`;
+
+    const audio = document.getElementById('playback');
+    audio.src = URL.createObjectURL(recordedBlob);
+    audio.style.display = 'block';
+
+    document.getElementById('recordStatus').textContent = 'Recording stopped. Blob generated.';
+
+    // Update request preview
+    const req = document.getElementById('requestPreview');
+    req.className = 'status ok';
+    req.textContent =
+      `POST ${document.getElementById('backendUrl').value.trim()}/api/translate/audio\n` +
+      `Content-Type: multipart/form-data\n\n` +
+      `audio — Blob, ${log.blobSizeKb} KB, Content-Type: ${baseMime}\n` +
+      `targetLanguage — ${document.getElementById('targetLang').value.trim() || '(not set)'}\n` +
+      `sourceLanguage — ${document.getElementById('sourceLang').value.trim() || '(omitted — auto)'}`;
+
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  // ── Step 5: Submit ─────────────────────────────────────────────────────────
+  async function submitRecording() {
+    if (!recordedBlob) return;
+
+    const url = document.getElementById('backendUrl').value.trim();
+    const targetLang = document.getElementById('targetLang').value.trim();
+    const sourceLang = document.getElementById('sourceLang').value.trim();
+    const baseMime = recordedBlob.type;
+
+    log.timestamp = new Date().toISOString();
+
+    document.getElementById('submitStatus').className = 'status idle';
+    document.getElementById('submitStatus').textContent = 'Submitting…';
+    document.getElementById('submitBtn').disabled = true;
+
+    const form = new FormData();
+    const file = new File([recordedBlob], 'recording.' + baseMime.split('/')[1], { type: baseMime });
+    form.append('audio', file);
+    form.append('targetLanguage', targetLang);
+    if (sourceLang) form.append('sourceLanguage', sourceLang);
+
+    let res;
+    try {
+      res = await fetch(`${url}/api/translate/audio`, { method: 'POST', body: form });
+    } catch (e) {
+      log.httpStatus = 'NETWORK_ERROR';
+      log.errorMessage = e.message;
+      document.getElementById('submitStatus').className = 'status error';
+      document.getElementById('submitStatus').textContent = `Network error: ${e.message}`;
+      document.getElementById('httpStatus').className = 'status error';
+      document.getElementById('httpStatus').textContent = `Network error — is the backend running?`;
+      document.getElementById('responseOutput').textContent = e.message;
+      document.getElementById('submitBtn').disabled = false;
+      return;
+    }
+
+    log.httpStatus = res.status;
+    log.httpStatusText = res.statusText;
+    log.correlationId = res.headers.get('X-Correlation-ID') || '(not in response headers — check response body)';
+
+    const body = await res.json().catch(() => null);
+    log.responseBody = body;
+
+    const el = document.getElementById('httpStatus');
+    const resEl = document.getElementById('responseOutput');
+
+    if (res.ok) {
+      log.transcript = body?.transcribedText ?? null;
+      log.translation = body?.translatedText ?? null;
+      log.provider = body?.provider ?? null;
+      if (body?.correlationId) log.correlationId = body.correlationId;
+
+      el.className = 'status ok';
+      el.textContent = `HTTP ${res.status} ${res.statusText} — Transcription succeeded.`;
+      document.getElementById('submitStatus').className = 'status ok';
+      document.getElementById('submitStatus').textContent = 'Submitted successfully.';
+    } else {
+      log.errorMessage = body?.message ?? `HTTP ${res.status}`;
+      el.className = 'status error';
+      el.textContent = `HTTP ${res.status} ${res.statusText} — Request failed.`;
+      document.getElementById('submitStatus').className = 'status error';
+      document.getElementById('submitStatus').textContent = `Failed. HTTP ${res.status}.`;
+    }
+
+    resEl.textContent = JSON.stringify(body, null, 2);
+    document.getElementById('submitBtn').disabled = false;
+    console.log('[Phase0] Response:', body);
+  }
+
+  // ── Step 7: Report ─────────────────────────────────────────────────────────
+  function generateReport() {
+    const success = log.httpStatus === 200 || log.httpStatus === 201 || log.httpStatus === 204;
+    const recommendation = success
+      ? 'PROCEED — Chrome WebM transcription confirmed working.'
+      : log.httpStatus
+      ? 'BLOCK — Transcription failed. Investigate MIME/credential issue before UI implementation.'
+      : 'INCOMPLETE — Phase 0 test not yet fully executed.';
+
+    const report = [
+      '## Phase 0 Validation Report',
+      '',
+      `Date: ${log.timestamp ?? new Date().toISOString()}`,
+      '',
+      `1. Browser tested`,
+      `   ${log.browser}`,
+      '',
+      `2. Actual MIME type produced`,
+      `   Negotiated: ${log.selectedMime ?? 'Not detected'}`,
+      `   Blob Content-Type: ${log.requestContentType ?? 'N/A'}`,
+      '',
+      `3. Blob size`,
+      `   ${log.blobSizeKb ? log.blobSizeKb + ' KB (' + log.blobSize + ' bytes)' : 'Not recorded'}`,
+      '',
+      `4. Request Content-Type sent`,
+      `   ${log.requestContentType ?? 'N/A'} (sent as multipart/form-data part)`,
+      '',
+      `5. Azure response`,
+      `   HTTP ${log.httpStatus ?? 'N/A'} ${log.httpStatusText ?? ''}`,
+      '',
+      `6. Transcript returned`,
+      `   ${log.transcript ?? (log.errorMessage ? 'ERROR: ' + log.errorMessage : 'N/A')}`,
+      '',
+      `7. Translation returned`,
+      `   ${log.translation ?? 'N/A'}`,
+      '',
+      `8. Q-025 resolution`,
+      `   Provider: ${log.provider ?? 'N/A'}`,
+      `   Correlation ID: ${log.correlationId ?? 'N/A'}`,
+      `   Q-025 status: ${success ? 'RESOLVED — Chrome WebM is supported by the Fast Transcription API.' : 'UNRESOLVED — transcription failed; see error above.'}`,
+      '',
+      `9. Recommendation`,
+      `   ${recommendation}`,
+      '',
+      '--- Full MIME Detection ---',
+      ...(log.mimeDetection.length
+        ? log.mimeDetection.map(m => `  ${m.mime}: ${m.supported ? 'supported' : 'not supported'}`)
+        : ['  (not run)']),
+      '',
+      '--- Full Response Body ---',
+      log.responseBody ? JSON.stringify(log.responseBody, null, 2) : '(not submitted)',
+    ].join('\n');
+
+    document.getElementById('reportOutput').value = report;
+  }
+
+  function copyReport() {
+    const ta = document.getElementById('reportOutput');
+    if (!ta.value) { generateReport(); }
+    ta.select();
+    try {
+      navigator.clipboard.writeText(ta.value);
+      alert('Report copied to clipboard.');
+    } catch {
+      document.execCommand('copy');
+      alert('Report copied.');
+    }
+  }
+</script>
+</body>
+</html>

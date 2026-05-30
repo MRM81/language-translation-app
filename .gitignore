@@ -1,0 +1,83 @@
+# Secrets / credentials
+.env
+.env.*
+!.env.example
+credentials.txt
+secrets.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+
+# Private / raw source material
+references/private/
+references/raw/
+references/client/
+samples/private/
+samples/raw/
+samples/client/
+
+# Local config
+.vscode/
+.idea/
+*.local
+*.user
+*.suo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+coverage/
+.cache/
+.parcel-cache/
+.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# .NET
+bin/
+obj/
+TestResults/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# Large generated artifacts
+*.zip
+*.7z
+*.rar
+
+# Optional: root-level Architect Pack exports
+# Prefer moving final packs into planning/architect-packs/
+# architect-pack-*.md
