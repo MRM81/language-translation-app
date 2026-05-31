@@ -168,11 +168,11 @@
 
 ---
 
-## Phase 0 Test Tool (Sprint 006)
+## Phase 0 Test Tool (Sprint 006) — DELETED in Sprint 012
 
 | File | Purpose |
 |------|---------|
-| src/frontend/public/phase0-test.html | Browser audio validation test page — served via Vite dev server at /phase0-test.html |
+| ~~src/frontend/public/phase0-test.html~~ | Deleted in Sprint 012 — was a development-only audio validation page; removed before production build |
 
 ---
 
@@ -231,6 +231,33 @@
 | scripts/apply-architect-pack.js | Script for applying Architect Packs |
 | src/README.md | Source code directory (empty — no production code yet) |
 | planning/meetings/README.md | Meetings and notes directory |
+
+---
+
+## Sprint Files (Sprint 012)
+
+| File | Purpose |
+|------|---------|
+| planning/sprints/012-aws-production-deployment/requirements.md | Sprint 012 requirements |
+| planning/sprints/012-aws-production-deployment/blueprint.md | Sprint 012 deployment steps and architecture decisions |
+| planning/sprints/012-aws-production-deployment/acceptance.md | Sprint 012 acceptance criteria and production validation results |
+| planning/sprints/012-aws-production-deployment/handoff-prompt.md | Sprint 012 handoff prompt |
+
+---
+
+## Architect Packs (Sprint 012)
+
+| File | Purpose |
+|------|---------|
+| architect-pack-012-aws-production-deployment.md | Architect Pack for Sprint 012 — AWS Production Deployment |
+
+---
+
+## Documentation Files (Sprint 012)
+
+| File | Purpose |
+|------|---------|
+| docs/PRODUCTION_DEPLOYMENT_REPORT.md | Sprint 012 production deployment report — URLs, validation results, architecture, lessons learned |
 
 ---
 

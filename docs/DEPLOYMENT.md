@@ -8,10 +8,21 @@
 
 ## AWS Deployment
 
-**The recommended deployment target is AWS.** See the AWS-specific guides:
+**The application is deployed on AWS.** See the AWS-specific guides:
 
 - [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) — Step-by-step AWS deployment (S3 + CloudFront + Elastic Beanstalk)
 - [docs/AWS_ARCHITECTURE.md](AWS_ARCHITECTURE.md) — Architecture diagram, component rationale, environment variable reference
+- [docs/PRODUCTION_DEPLOYMENT_REPORT.md](PRODUCTION_DEPLOYMENT_REPORT.md) — Sprint 012 deployment record, URLs, validation results
+
+### Live Production Environment (Sprint 012)
+
+| Resource | URL |
+|---|---|
+| Frontend (CloudFront) | https://d2ftspeokj49uq.cloudfront.net |
+| Backend (Elastic Beanstalk) | http://my-translation-api-prod.eba-pahyptkw.ap-southeast-2.elasticbeanstalk.com |
+| AWS Region | ap-southeast-2 (Sydney) |
+
+**Architecture pattern:** Same-origin proxy — CloudFront routes `/api/*` and `/health` to EB, `/*` to S3. The frontend calls the same CloudFront domain (no CORS). See [docs/PRODUCTION_DEPLOYMENT_REPORT.md](PRODUCTION_DEPLOYMENT_REPORT.md) for full details.
 
 The sections below document the general build and configuration approach applicable to any hosting target.
 

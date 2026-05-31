@@ -66,6 +66,16 @@ dotnet test tests/backend/MyTranslationApp.Tests --configuration Release
 
 **Purpose:** Live deployment for real users.
 
+**Live URLs (Sprint 012):**
+
+| Service | URL |
+|---|---|
+| Frontend | https://d2ftspeokj49uq.cloudfront.net |
+| Health | https://d2ftspeokj49uq.cloudfront.net/health |
+| API | https://d2ftspeokj49uq.cloudfront.net/api |
+
+**Deployment pattern:** Same-origin CloudFront proxy — CloudFront routes `/api/*` and `/health` to Elastic Beanstalk; `/*` serves static assets from S3. Frontend built with `VITE_API_BASE_URL=""` (relative URLs). No browser-visible CORS.
+
 **Provider:** Azure (set in `appsettings.Production.json`).
 
 **Activation:** `ASPNETCORE_ENVIRONMENT=Production`.
@@ -161,18 +171,19 @@ ASPNETCORE_URLS        = http://+:5000
 Translation__Provider  = Azure
 
 AzureTranslator__Key      = <secret — do not commit>
-AzureTranslator__Region   = eastus
+AzureTranslator__Region   = australiaeast
+AzureTranslator__Endpoint = https://mark-translation-app-ai-001.cognitiveservices.azure.com/
 
 AzureSpeech__Key          = <secret — do not commit>
-AzureSpeech__Region       = eastus
-AzureSpeech__Endpoint     = https://your-resource.cognitiveservices.azure.com
+AzureSpeech__Region       = australiaeast
+AzureSpeech__Endpoint     = https://mark-translation-app-ai-001.cognitiveservices.azure.com
 
-AllowedCorsOrigins__0     = https://your-cloudfront-domain.cloudfront.net
+AllowedCorsOrigins__0     = https://d2ftspeokj49uq.cloudfront.net
 ```
 
-`ASPNETCORE_URLS=http://+:5000` is required because EB's nginx reverse proxy forwards to port 5000, but the backend development default is port 5074. This environment variable overrides Kestrel's listen address for production.
+`ASPNETCORE_URLS=http://+:5000` is required because EB's nginx reverse proxy forwards to port 5000, but the backend development default is port 5074.
 
-See [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the full step-by-step AWS guide.
+See [docs/AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the full step-by-step AWS guide and [docs/PRODUCTION_DEPLOYMENT_REPORT.md](PRODUCTION_DEPLOYMENT_REPORT.md) for the Sprint 012 deployment record.
 
 ---
 

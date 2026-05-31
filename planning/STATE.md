@@ -2,20 +2,45 @@
 
 ## Current Status
 
-Sprint 011 (AWS Deployment Preparation) is complete. Frontend API base URL made configurable (`VITE_API_BASE_URL`), `.env.production.example` added, AWS deployment and architecture docs created, existing docs updated with AWS-specific guidance. 133/133 tests pass. Build clean.
+Sprint 012 (AWS Production Deployment) is complete. Application is live on AWS. All acceptance criteria met. 133/133 tests pass. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
 
 ---
 
+## Production URLs
+
+| Service | URL |
+|---|---|
+| Frontend (CloudFront HTTPS) | https://d2ftspeokj49uq.cloudfront.net |
+| Backend (Elastic Beanstalk HTTP) | http://my-translation-api-prod.eba-pahyptkw.ap-southeast-2.elasticbeanstalk.com |
+| Health endpoint | https://d2ftspeokj49uq.cloudfront.net/health |
+
+---
+
 ## Active Sprint
 
-None. Sprint 011 is complete. Recommended next sprint: Sprint 012 — AWS Production Deployment (live deployment to AWS).
+None. Sprint 012 is complete. Recommended next sprint: Sprint 013 — Conversation Mode.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 012 — AWS Production Deployment
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- Backend deployed to Elastic Beanstalk (`my-translation-api-prod`, ap-southeast-2, .NET 8 on AL2023, SingleInstance)
+- Frontend deployed to S3 (`my-translation-app-frontend`) + CloudFront (`EOSQIHDJHIZ82`, `d2ftspeokj49uq.cloudfront.net`)
+- Same-origin CloudFront proxy pattern: `/api/*` and `/health` → EB; `/*` → S3 (avoids mixed-content, eliminates CORS for browser calls)
+- All production validation passed: health, 37-language catalog, translation (en→es/zh-Hans), TTS, STT round-trip
+- `src/frontend/public/phase0-test.html` removed (Sprint 006 dev artifact — not appropriate for production)
+- IAM role `aws-elasticbeanstalk-ec2-role` created
+- D-086 to D-089 added; R-052 to R-054 added; Q-045 resolved; Q-047 to Q-048 updated
+- `docs/PRODUCTION_DEPLOYMENT_REPORT.md` created
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 011 — AWS Deployment Preparation
 Status: Completed
@@ -249,25 +274,20 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 012 — AWS Production Deployment (actual deployment using docs from Sprint 011).
-2. Live Azure validation for Sprint 009A/B expanded languages (requires credentials — see acceptance.md files).
-3. Decide custom domain (Q-046) — Route 53 + ACM certificate.
-4. Consider CI/CD after first manual deployment succeeds (Q-047).
-5. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
+1. Sprint 013 — Conversation Mode (recommended next sprint per Architect Pack 012).
+2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
+3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
+4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
+5. SSM Parameter Store for Azure credentials (R-053 mitigation).
+6. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
 
 ## Last Updated
 
-2026-05-31 (Sprint 011 complete — AWS deployment preparation delivered)
+2026-05-31 (Sprint 012 complete — application deployed to AWS, all acceptance criteria met)
 
 ---
 
 ## Blockers
 
-None. Audio duration enforcement remains deferred (R-016, Q-015).
+None. Application is live. Audio duration enforcement remains deferred (R-016, Q-015).
 WebM live validation confirmed via Phase 0. MP3 and WAV live validation pending (no credentials required issue — see src/backend/README.md).
-
----
-
-## Last Updated
-
-2026-05-30 (Sprint 007 complete — all acceptance criteria met, defect fixed)

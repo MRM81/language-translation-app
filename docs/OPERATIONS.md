@@ -223,21 +223,97 @@ When investigating a reported issue, ask the user for the `correlationId` from t
 
 ## AWS-Specific Operations Notes
 
+### Production Environment (Sprint 012)
+
+| Resource | Value |
+|---|---|
+| EB Application | `my-translation-app` |
+| EB Environment | `my-translation-api-prod` (e-wkmimrxppx) |
+| EB URL | http://my-translation-api-prod.eba-pahyptkw.ap-southeast-2.elasticbeanstalk.com |
+| CloudFront Distribution | `EOSQIHDJHIZ82` |
+| CloudFront URL | https://d2ftspeokj49uq.cloudfront.net |
+| S3 Bucket | `my-translation-app-frontend` |
+| Region | ap-southeast-2 (Sydney) |
+
 ### Elastic Beanstalk Health Check
 
-EB's default health check targets `GET /` which returns 404. Configure the health check path to `/health` in the EB environment:
+The EB environment is configured with health check path `/health` via the `Application Healthcheck URL` option setting. The `/health` endpoint returns HTTP 200 with `{ "status": "healthy" }` regardless of Azure provider status — this is intentional (D-078).
 
-**AWS Console:** EB Environment → Configuration → Load balancer → Processes → Edit default process → **Health check path: `/health`**
+To verify EB is healthy:
+```bash
+curl http://my-translation-api-prod.eba-pahyptkw.ap-southeast-2.elasticbeanstalk.com/health
+# Expected: { "status": "healthy" }
+```
 
-The `/health` endpoint returns HTTP 200 with `{ "status": "healthy" }` regardless of Azure provider status. This is intentional — a connectivity check would require Azure credentials in the probe path.
+Or through CloudFront (recommended):
+```bash
+curl https://d2ftspeokj49uq.cloudfront.net/health
+# Expected: { "status": "healthy" }
+```
 
 ### CORS and CloudFront
 
-If the browser shows `Access-Control-Allow-Origin` errors when the frontend is on CloudFront:
+The Sprint 012 deployment uses **same-origin proxy pattern** — CloudFront routes `/api/*` to EB. Browser API calls are same-origin (CloudFront domain) so CORS preflight does not occur.
 
-1. Verify `AllowedCorsOrigins__0` on EB matches the exact CloudFront domain (including `https://`).
-2. Verify the CloudFront **Origin request policy** is configured to forward the `Origin` header to the backend. Without this, `OPTIONS` preflight requests fail silently.
-3. Restart the EB environment after changing `AllowedCorsOrigins`.
+`AllowedCorsOrigins__0` is set to `https://d2ftspeokj49uq.cloudfront.net` on EB as a belt-and-suspenders configuration.
+
+If a CORS error appears in the browser (unexpected in same-origin pattern), check:
+1. That the request URL uses the CloudFront domain, not the EB domain directly.
+2. That the CloudFront `/api/*` behavior is routing to EB (check CloudFront distribution behaviors).
+
+### Redeploying the Backend
+
+```bash
+# 1. Publish
+dotnet publish src/backend/MyTranslationApp.Api/MyTranslationApp.Api.csproj \
+  --configuration Release --runtime linux-x64 --self-contained false --output ./publish
+
+# 2. Package (PowerShell)
+Compress-Archive -Path ./publish/* -DestinationPath ./my-translation-api-v2.zip -Force
+
+# 3. Upload to S3
+aws s3 cp my-translation-api-v2.zip \
+  s3://elasticbeanstalk-ap-southeast-2-185512089178/my-translation-app/my-translation-api-v2.zip
+
+# 4. Create new EB application version
+aws elasticbeanstalk create-application-version \
+  --application-name my-translation-app \
+  --version-label v2.0.0 \
+  --source-bundle S3Bucket=elasticbeanstalk-ap-southeast-2-185512089178,S3Key=my-translation-app/my-translation-api-v2.zip \
+  --region ap-southeast-2
+
+# 5. Deploy to environment
+aws elasticbeanstalk update-environment \
+  --environment-name my-translation-api-prod \
+  --version-label v2.0.0 \
+  --region ap-southeast-2
+```
+
+### Redeploying the Frontend
+
+```bash
+# Build with same-origin config (VITE_API_BASE_URL empty = CloudFront proxy)
+cd src/frontend
+npm run build
+
+# Sync to S3
+aws s3 sync dist/ s3://my-translation-app-frontend --delete --region ap-southeast-2
+
+# Invalidate CloudFront cache
+aws cloudfront create-invalidation \
+  --distribution-id EOSQIHDJHIZ82 \
+  --paths "/*"
+```
+
+### Stopping the Environment (Cost Control)
+
+```bash
+aws elasticbeanstalk terminate-environment \
+  --environment-name my-translation-api-prod \
+  --region ap-southeast-2
+```
+
+S3 and CloudFront have negligible cost at rest. The EB EC2 instance (~$8–10/month) is the main ongoing charge.
 
 ### EB Startup Log
 
