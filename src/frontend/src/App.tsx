@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { fetchLanguages } from './api/translationApi';
 import { AudioTranslationForm } from './components/AudioTranslationForm';
+import { ConversationMode } from './components/ConversationMode';
 import { ErrorPanel } from './components/ErrorPanel';
 import { ResultPanel } from './components/ResultPanel';
 import { TextTranslationForm } from './components/TextTranslationForm';
 import './styles/app.css';
 import type { ApiErrorResponse, LanguageOption, TranslationResult } from './types/api';
 
+type AppMode = 'translate' | 'conversation';
+
 export function App() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
   const [languagesLoading, setLanguagesLoading] = useState(true);
   const [languagesError, setLanguagesError] = useState('');
+  const [mode, setMode] = useState<AppMode>('translate');
 
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [error, setError] = useState<ApiErrorResponse | string | null>(null);
@@ -61,36 +65,65 @@ export function App() {
         )}
 
         {!languagesLoading && (
-          <div className="forms-grid">
-            <TextTranslationForm
-              languages={languages}
-              onResult={handleResult}
-              onError={handleError}
-              onSubmitStart={handleSubmitStart}
-            />
-            <AudioTranslationForm
-              languages={languages}
-              onResult={handleResult}
-              onError={handleError}
-              onSubmitStart={handleSubmitStart}
-            />
-          </div>
-        )}
+          <>
+            <nav className="app-mode-nav" aria-label="Application mode">
+              <button
+                type="button"
+                className={`mode-nav-btn${mode === 'translate' ? ' active' : ''}`}
+                onClick={() => setMode('translate')}
+                aria-pressed={mode === 'translate'}
+              >
+                Translation
+              </button>
+              <button
+                type="button"
+                className={`mode-nav-btn${mode === 'conversation' ? ' active' : ''}`}
+                onClick={() => setMode('conversation')}
+                aria-pressed={mode === 'conversation'}
+              >
+                Conversation
+              </button>
+            </nav>
 
-        <div className="results-area" aria-live="polite" aria-atomic="false">
-          {error ? (
-            <ErrorPanel error={error} />
-          ) : (
-            <ResultPanel
-              result={result}
-              targetLangSupportsTts={
-                result
-                  ? (languages.find(l => l.code === result.data.targetLanguage)?.supportsTextToSpeech ?? true)
-                  : true
-              }
-            />
-          )}
-        </div>
+            {mode === 'translate' && (
+              <>
+                <div className="forms-grid">
+                  <TextTranslationForm
+                    languages={languages}
+                    onResult={handleResult}
+                    onError={handleError}
+                    onSubmitStart={handleSubmitStart}
+                  />
+                  <AudioTranslationForm
+                    languages={languages}
+                    onResult={handleResult}
+                    onError={handleError}
+                    onSubmitStart={handleSubmitStart}
+                  />
+                </div>
+
+                <div className="results-area" aria-live="polite" aria-atomic="false">
+                  {error ? (
+                    <ErrorPanel error={error} />
+                  ) : (
+                    <ResultPanel
+                      result={result}
+                      targetLangSupportsTts={
+                        result
+                          ? (languages.find((l) => l.code === result.data.targetLanguage)?.supportsTextToSpeech ?? true)
+                          : true
+                      }
+                    />
+                  )}
+                </div>
+              </>
+            )}
+
+            {mode === 'conversation' && (
+              <ConversationMode languages={languages} />
+            )}
+          </>
+        )}
       </main>
     </>
   );

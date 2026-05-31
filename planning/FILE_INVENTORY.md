@@ -261,6 +261,35 @@
 
 ---
 
+## Architect Packs (Sprint 013)
+
+| File | Purpose |
+|------|---------|
+| architect-pack-013-conversation-mode.md | Architect Pack for Sprint 013 — Conversation Mode |
+
+---
+
+## Frontend Source Files (Sprint 013)
+
+| File | Purpose |
+|------|---------|
+| src/frontend/src/types/conversation.ts | `ConversationMessage` TypeScript interface |
+| src/frontend/src/components/ConversationMode.tsx | Conversation Mode container — language selectors, turn orchestration, auto-play |
+| src/frontend/src/components/ConversationHistory.tsx | Scrollable conversation history list |
+| src/frontend/src/components/ConversationInput.tsx | Active speaker display, text input, audio file upload, auto-play toggle |
+| src/frontend/src/components/ConversationMessage.tsx | Individual conversation message bubble |
+
+---
+
+## Modified Files (Sprint 013)
+
+| File | Change |
+|------|---------|
+| src/frontend/src/App.tsx | Added mode toggle nav (Translation / Conversation); conditionally renders ConversationMode |
+| src/frontend/src/styles/app.css | Added conversation mode styles (nav, history, message bubbles, input, mobile) |
+
+---
+
 ## To Be Discovered
 
 - Implementation repository location (GitHub / TBD)

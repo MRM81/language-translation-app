@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 012 (AWS Production Deployment) is complete. Application is live on AWS. All acceptance criteria met. 133/133 tests pass. Build clean.
+Sprint 013 (Conversation Mode) is complete. Conversation Mode added as a frontend orchestration layer over existing APIs. All acceptance criteria met. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,29 @@ Sprint 012 (AWS Production Deployment) is complete. Application is live on AWS. 
 
 ## Active Sprint
 
-None. Sprint 012 is complete. Recommended next sprint: Sprint 013 — Conversation Mode.
+None. Sprint 013 is complete. Recommended next sprint: Sprint 014 — Push-To-Talk Conversation UX.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 013 — Conversation Mode
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/types/conversation.ts` — `ConversationMessage` interface
+- `src/frontend/src/components/ConversationMode.tsx` — container: language selectors, turn orchestration, auto-play, clear conversation
+- `src/frontend/src/components/ConversationHistory.tsx` — scrollable history with auto-scroll to latest message
+- `src/frontend/src/components/ConversationInput.tsx` — active speaker display, text/audio file tabs, auto-play toggle, switch speaker
+- `src/frontend/src/components/ConversationMessage.tsx` — message bubbles (A left / B right, original + translation + timestamp)
+- `src/frontend/src/App.tsx` — mode toggle nav (Translation / Conversation); existing Translation Mode fully preserved
+- `src/frontend/src/styles/app.css` — conversation styles (mode nav, history, bubbles, input, mobile)
+- No backend changes — all APIs reused: `translateText`, `translateAudio`, `synthesizeSpeech`, `fetchLanguages`
+- Language swap affects future turns only; existing history is immutable (D-092, Architect correction)
+- Clear Conversation button resets history and active speaker to A (should-have per Architect review)
+- D-090 to D-093 added; Q-049 to Q-051 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 012 — AWS Production Deployment
 Status: Completed
@@ -274,7 +292,7 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 013 — Conversation Mode (recommended next sprint per Architect Pack 012).
+1. Sprint 014 — Push-To-Talk Conversation UX (recommended next sprint per Architect Pack 013).
 2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
@@ -283,7 +301,7 @@ Outcomes:
 
 ## Last Updated
 
-2026-05-31 (Sprint 012 complete — application deployed to AWS, all acceptance criteria met)
+2026-05-31 (Sprint 013 complete — Conversation Mode added as frontend orchestration layer)
 
 ---
 
