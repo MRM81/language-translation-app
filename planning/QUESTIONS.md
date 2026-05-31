@@ -62,3 +62,6 @@ Track open questions that require client, Architect, or stakeholder input.
 | Q-052 | 2026-05-31 | Should voice activity detection replace hold-to-talk in a future sprint? | Owner / Architect | No | Open | TBD. Hold-to-talk (Sprint 014) is the simplest reliable pattern. VAD adds complexity and false-trigger risk. |
 | Q-053 | 2026-05-31 | Should the Record tab be the default tab in Conversation Mode? | Owner | No | Resolved | Yes — Record is the default tab per D-095. Sprint 014. |
 | Q-054 | 2026-05-31 | Should the recorded audio blob be stored temporarily for replay by the user? | Owner | No | Open | TBD. Currently only the TTS translation is played back. Storing the original recording would allow the user to replay what was said. |
+| Q-055 | 2026-05-31 | Should multiple saved conversations be supported (a conversation list/history)? | Owner | No | Open | TBD. Single active conversation for Sprint 015. Multi-conversation management is Sprint 016. |
+| Q-056 | 2026-05-31 | Should conversations be named or titled by the user? | Owner | No | Open | TBD. Currently untitled. Naming would require Sprint 016 multi-conversation UI. |
+| Q-057 | 2026-05-31 | Should PDF export be added in a future sprint? | Owner | No | Open | TBD. TXT and JSON cover Sprint 015. PDF requires a library dependency (e.g. jsPDF) and formatting work. |

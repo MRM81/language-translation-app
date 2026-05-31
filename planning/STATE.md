@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 014 (Push-To-Talk Conversation UX) is complete. PTT recording integrated into Conversation Mode using existing Sprint 006 infrastructure. iOS Safari MIME gap resolved. All acceptance criteria met. 133/133 tests pass. TypeScript clean. Build clean.
+Sprint 015 (Conversation Persistence & Export) is complete. localStorage persistence, session restore, TXT/JSON export, and clipboard copy added to Conversation Mode. All browser-only — no backend changes. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,25 @@ Sprint 014 (Push-To-Talk Conversation UX) is complete. PTT recording integrated 
 
 ## Active Sprint
 
-None. Sprint 014 is complete. Recommended next sprint: Sprint 015 — Conversation Persistence & Export.
+None. Sprint 015 is complete. Recommended next sprint: Sprint 016 — Multi-Conversation Management.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 015 — Conversation Persistence & Export
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/types/conversation.ts` — `ConversationSession` interface and `CONVERSATION_STORAGE_VERSION = 1` constant added
+- `src/frontend/src/services/ConversationStorageService.ts` — `load`, `save`, `clear` with version validation, shape validation, silent `try/catch` for private mode / quota errors
+- `src/frontend/src/services/ConversationExportService.ts` — `exportAsTxt`, `exportAsJson`, `copyToClipboard`; shared `buildTxt` formatter; browser download via object URL
+- `src/frontend/src/components/ConversationMode.tsx` — restore-on-mount effect; save-on-change effect; `handleClear` now calls `clearSession()`; `copyStatus` state with timer cleanup on unmount; export action toolbar (Export TXT / Export JSON / Copy / Clear)
+- `src/frontend/src/styles/app.css` — `.conv-action-row`, `.btn-conv-action`, `--copied`, `--error`, `--destructive` modifiers
+- Storage key: `my-translation-app-conversation`; single active conversation; localStorage only
+- D-098 to D-101 added; Q-055 to Q-057 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 014 — Push-To-Talk Conversation UX
 Status: Completed
@@ -304,7 +318,7 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 015 — Conversation Persistence & Export (recommended next sprint per Architect Pack 014).
+1. Sprint 016 — Multi-Conversation Management (recommended next sprint per Architect Pack 015).
 2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
@@ -313,7 +327,7 @@ Outcomes:
 
 ## Last Updated
 
-2026-05-31 (Sprint 014 complete — PTT recording integrated into Conversation Mode)
+2026-05-31 (Sprint 015 complete — conversation persistence and export added)
 
 ---
 

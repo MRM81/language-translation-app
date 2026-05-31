@@ -1059,6 +1059,56 @@ code {
   gap: 0.75rem;
 }
 
+/* ===== CONVERSATION ACTION ROW ===== */
+
+.conv-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-conv-action {
+  padding: 0.375rem 0.875rem;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  min-height: 36px;
+}
+
+.btn-conv-action:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.btn-conv-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-conv-action--copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.btn-conv-action--error {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.btn-conv-action--destructive:hover:not(:disabled) {
+  color: var(--error);
+  border-color: var(--error);
+  background: transparent;
+}
+
 /* ===== MOBILE — CONVERSATION ===== */
 
 @media (max-width: 480px) {

@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { synthesizeSpeech, translateAudio, translateText } from '../api/translationApi';
+import { copyToClipboard, exportAsJson, exportAsTxt } from '../services/ConversationExportService';
+import { clearSession, loadSession, saveSession } from '../services/ConversationStorageService';
 import type { LanguageOption } from '../types/api';
-import type { ConversationMessage } from '../types/conversation';
+import {
+  CONVERSATION_STORAGE_VERSION,
+  type ConversationMessage,
+  type ConversationSession,
+} from '../types/conversation';
 import { ConversationHistory } from './ConversationHistory';
 import { ConversationInput } from './ConversationInput';
 import { LanguageSelect } from './LanguageSelect';
@@ -9,6 +15,8 @@ import { LanguageSelect } from './LanguageSelect';
 interface Props {
   languages: LanguageOption[];
 }
+
+type CopyStatus = 'idle' | 'copied' | 'error';
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -23,9 +31,42 @@ export function ConversationMode({ languages }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playError, setPlayError] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const langAName = languages.find((l) => l.code === langA)?.name ?? langA;
   const langBName = languages.find((l) => l.code === langB)?.name ?? langB;
+
+  // Restore session on mount
+  useEffect(() => {
+    const session = loadSession();
+    if (session) {
+      setLangA(session.languageA);
+      setLangB(session.languageB);
+      setMessages(session.messages);
+    }
+  }, []);
+
+  // Persist session whenever conversation state changes
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const session: ConversationSession = {
+      version: CONVERSATION_STORAGE_VERSION,
+      createdAt: messages[0].timestamp,
+      updatedAt: messages[messages.length - 1].timestamp,
+      languageA: langA,
+      languageB: langB,
+      messages,
+    };
+    saveSession(session);
+  }, [messages, langA, langB]);
+
+  // Clean up copy feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   function handleSwap() {
     // History is immutable — messages retain their original language pairs.
@@ -39,6 +80,7 @@ export function ConversationMode({ languages }: Props) {
     setActiveSpeaker('A');
     setError(null);
     setPlayError(null);
+    clearSession();
   }
 
   async function tryAutoPlay(translatedText: string, targetLanguage: string) {
@@ -132,6 +174,39 @@ export function ConversationMode({ languages }: Props) {
     }
   }
 
+  function handleExportTxt() {
+    exportAsTxt(messages, langAName, langBName);
+  }
+
+  function handleExportJson() {
+    const session: ConversationSession = {
+      version: CONVERSATION_STORAGE_VERSION,
+      createdAt: messages[0]?.timestamp ?? new Date().toISOString(),
+      updatedAt: messages[messages.length - 1]?.timestamp ?? new Date().toISOString(),
+      languageA: langA,
+      languageB: langB,
+      messages,
+    };
+    exportAsJson(session);
+  }
+
+  async function handleCopy() {
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    try {
+      await copyToClipboard(messages, langAName, langBName);
+      setCopyStatus('copied');
+      copyTimerRef.current = setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch {
+      setCopyStatus('error');
+      copyTimerRef.current = setTimeout(() => setCopyStatus('idle'), 3000);
+    }
+  }
+
+  const copyLabel =
+    copyStatus === 'copied' ? 'Copied!' :
+    copyStatus === 'error' ? 'Failed' :
+    'Copy';
+
   return (
     <div className="conversation-mode">
       <div className="conv-lang-header">
@@ -165,15 +240,43 @@ export function ConversationMode({ languages }: Props) {
             required
           />
         </div>
+
         {messages.length > 0 && (
-          <button
-            type="button"
-            className="btn-clear-conv"
-            onClick={handleClear}
-            disabled={loading}
-          >
-            Clear conversation
-          </button>
+          <div className="conv-action-row">
+            <button
+              type="button"
+              className="btn-conv-action"
+              onClick={handleExportTxt}
+              disabled={loading}
+            >
+              Export TXT
+            </button>
+            <button
+              type="button"
+              className="btn-conv-action"
+              onClick={handleExportJson}
+              disabled={loading}
+            >
+              Export JSON
+            </button>
+            <button
+              type="button"
+              className={`btn-conv-action${copyStatus !== 'idle' ? ` btn-conv-action--${copyStatus}` : ''}`}
+              onClick={handleCopy}
+              disabled={loading}
+              aria-live="polite"
+            >
+              {copyLabel}
+            </button>
+            <button
+              type="button"
+              className="btn-conv-action btn-conv-action--destructive"
+              onClick={handleClear}
+              disabled={loading}
+            >
+              Clear
+            </button>
+          </div>
         )}
       </div>
 

@@ -8,3 +8,14 @@ export interface ConversationMessage {
   timestamp: string;
   inputType: 'text' | 'audio';
 }
+
+export const CONVERSATION_STORAGE_VERSION = 1;
+
+export interface ConversationSession {
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  languageA: string;
+  languageB: string;
+  messages: ConversationMessage[];
+}
