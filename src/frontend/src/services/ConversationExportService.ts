@@ -20,8 +20,10 @@ function buildTxt(
   messages: ConversationMessage[],
   langAName: string,
   langBName: string,
+  title?: string,
 ): string {
-  return messages
+  const header = title ? `Conversation: ${title}\n${SEPARATOR}\n\n` : '';
+  const body = messages
     .map((msg) => {
       const speakerName = msg.speaker === 'A' ? langAName : langBName;
       return [
@@ -35,16 +37,18 @@ function buildTxt(
       ].join('\n');
     })
     .join('\n');
+  return header + body;
 }
 
 export function exportAsTxt(
   messages: ConversationMessage[],
   langAName: string,
   langBName: string,
+  title?: string,
 ): void {
   if (messages.length === 0) return;
   download(
-    buildTxt(messages, langAName, langBName),
+    buildTxt(messages, langAName, langBName, title),
     `conversation-${dateStamp()}.txt`,
     'text/plain;charset=utf-8',
   );
@@ -63,8 +67,9 @@ export async function copyToClipboard(
   messages: ConversationMessage[],
   langAName: string,
   langBName: string,
+  title?: string,
 ): Promise<void> {
   if (messages.length === 0) return;
   if (!navigator.clipboard) throw new Error('Clipboard API unavailable');
-  await navigator.clipboard.writeText(buildTxt(messages, langAName, langBName));
+  await navigator.clipboard.writeText(buildTxt(messages, langAName, langBName, title));
 }

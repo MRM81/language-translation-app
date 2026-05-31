@@ -65,3 +65,7 @@ Track open questions that require client, Architect, or stakeholder input.
 | Q-055 | 2026-05-31 | Should multiple saved conversations be supported (a conversation list/history)? | Owner | No | Open | TBD. Single active conversation for Sprint 015. Multi-conversation management is Sprint 016. |
 | Q-056 | 2026-05-31 | Should conversations be named or titled by the user? | Owner | No | Open | TBD. Currently untitled. Naming would require Sprint 016 multi-conversation UI. |
 | Q-057 | 2026-05-31 | Should PDF export be added in a future sprint? | Owner | No | Open | TBD. TXT and JSON cover Sprint 015. PDF requires a library dependency (e.g. jsPDF) and formatting work. |
+| Q-058 | 2026-05-31 | Should users be able to search conversations by title or content? | Owner | No | Open | TBD. Sprint 017 candidate. Currently limited by lack of full-text index in localStorage. |
+| Q-059 | 2026-05-31 | Should conversations support folders or tags for organisation? | Owner | No | Open | TBD. Post-016 enhancement. Would require UI to manage taxonomy. |
+| Q-060 | 2026-05-31 | Should cloud sync be considered once authentication is added? | Owner | No | Open | TBD. Cloud sync requires accounts, backend storage, and conflict resolution. None of these are in scope for MVP. |
+| Q-061 | 2026-05-31 | Should "Export All Conversations" be added in a future sprint? | Owner | No | Open | TBD. Currently only the active conversation exports. Bulk export would bundle all stored conversations into a single file. |

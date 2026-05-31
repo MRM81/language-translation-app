@@ -1,15 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { synthesizeSpeech, translateAudio, translateText } from '../api/translationApi';
 import { copyToClipboard, exportAsJson, exportAsTxt } from '../services/ConversationExportService';
-import { clearSession, loadSession, saveSession } from '../services/ConversationStorageService';
+import {
+  createConversation,
+  deleteConversation,
+  getActiveSession,
+  getConversationSummaries,
+  loadOrMigrateStore,
+  loadStore,
+  renameConversation,
+  saveStore,
+  switchConversation,
+  updateConversation,
+} from '../services/ConversationStorageService';
 import type { LanguageOption } from '../types/api';
 import {
   CONVERSATION_STORAGE_VERSION,
   type ConversationMessage,
   type ConversationSession,
+  type ConversationStore,
+  type ConversationSummary,
 } from '../types/conversation';
 import { ConversationHistory } from './ConversationHistory';
 import { ConversationInput } from './ConversationInput';
+import { ConversationManager } from './ConversationManager';
 import { LanguageSelect } from './LanguageSelect';
 
 interface Props {
@@ -22,6 +36,10 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function defaultTitle(store: ConversationStore): string {
+  return `Conversation ${Object.keys(store.conversations).length + 1}`;
+}
+
 export function ConversationMode({ languages }: Props) {
   const [langA, setLangA] = useState('');
   const [langB, setLangB] = useState('');
@@ -32,41 +50,149 @@ export function ConversationMode({ languages }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [playError, setPlayError] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeTitle, setActiveTitle] = useState('');
+  const [summaries, setSummaries] = useState<ConversationSummary[]>([]);
+
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const langAName = languages.find((l) => l.code === langA)?.name ?? langA;
   const langBName = languages.find((l) => l.code === langB)?.name ?? langB;
 
-  // Restore session on mount
+  // ── Load / migrate on mount ────────────────────────────────────────────────
+
   useEffect(() => {
-    const session = loadSession();
-    if (session) {
-      setLangA(session.languageA);
-      setLangB(session.languageB);
-      setMessages(session.messages);
+    const store = loadOrMigrateStore();
+    const active = getActiveSession(store);
+
+    if (active) {
+      setActiveConversationId(active.id);
+      setActiveTitle(active.title);
+      setLangA(active.languageA);
+      setLangB(active.languageB);
+      setMessages(active.messages);
+      setSummaries(getConversationSummaries(store));
+    } else {
+      // No conversations — create the first one automatically
+      const { store: newStore, id } = createConversation(store, 'Conversation 1');
+      saveStore(newStore);
+      setActiveConversationId(id);
+      setActiveTitle('Conversation 1');
+      setSummaries(getConversationSummaries(newStore));
     }
   }, []);
 
-  // Persist session whenever conversation state changes
+  // ── Persist active session whenever conversation state changes ─────────────
+
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (!activeConversationId) return;
+    const currentStore = loadStore();
+    if (!currentStore) return;
+
+    const now = new Date().toISOString();
     const session: ConversationSession = {
+      id: activeConversationId,
+      title: activeTitle,
       version: CONVERSATION_STORAGE_VERSION,
-      createdAt: messages[0].timestamp,
-      updatedAt: messages[messages.length - 1].timestamp,
+      createdAt: messages[0]?.timestamp ?? currentStore.conversations[activeConversationId]?.createdAt ?? now,
+      updatedAt: messages[messages.length - 1]?.timestamp ?? now,
       languageA: langA,
       languageB: langB,
       messages,
     };
-    saveSession(session);
-  }, [messages, langA, langB]);
+    const updated = updateConversation(currentStore, session);
+    saveStore(updated);
+    setSummaries(getConversationSummaries(updated));
+  }, [messages, langA, langB, activeConversationId, activeTitle]);
 
-  // Clean up copy feedback timer on unmount
+  // ── Clean up copy timer on unmount ─────────────────────────────────────────
+
   useEffect(() => {
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     };
   }, []);
+
+  // ── Conversation management handlers ──────────────────────────────────────
+
+  function handleNew() {
+    const currentStore = loadStore();
+    if (!currentStore) return;
+    const title = defaultTitle(currentStore);
+    const { store: newStore, id } = createConversation(currentStore, title);
+    saveStore(newStore);
+    setActiveConversationId(id);
+    setActiveTitle(title);
+    setLangA('');
+    setLangB('');
+    setMessages([]);
+    setActiveSpeaker('A');
+    setError(null);
+    setPlayError(null);
+    setSummaries(getConversationSummaries(newStore));
+  }
+
+  function handleSwitch(id: string) {
+    const currentStore = loadStore();
+    if (!currentStore) return;
+    const session = currentStore.conversations[id];
+    if (!session) return;
+    const updatedStore = switchConversation(currentStore, id);
+    saveStore(updatedStore);
+    setActiveConversationId(session.id);
+    setActiveTitle(session.title);
+    setLangA(session.languageA);
+    setLangB(session.languageB);
+    setMessages(session.messages);
+    setActiveSpeaker('A');
+    setError(null);
+    setPlayError(null);
+    setSummaries(getConversationSummaries(updatedStore));
+  }
+
+  function handleRename(id: string, title: string) {
+    const currentStore = loadStore();
+    if (!currentStore) return;
+    const updatedStore = renameConversation(currentStore, id, title);
+    saveStore(updatedStore);
+    if (id === activeConversationId) setActiveTitle(title);
+    setSummaries(getConversationSummaries(updatedStore));
+  }
+
+  function handleDelete(id: string) {
+    const currentStore = loadStore();
+    if (!currentStore) return;
+    const updatedStore = deleteConversation(currentStore, id);
+
+    if (updatedStore.activeConversationId === null) {
+      // Last conversation deleted — create a blank one
+      const { store: freshStore, id: newId } = createConversation(updatedStore, 'Conversation 1');
+      saveStore(freshStore);
+      setActiveConversationId(newId);
+      setActiveTitle('Conversation 1');
+      setLangA('');
+      setLangB('');
+      setMessages([]);
+      setActiveSpeaker('A');
+      setSummaries(getConversationSummaries(freshStore));
+    } else {
+      saveStore(updatedStore);
+      const newActive = getActiveSession(updatedStore);
+      if (newActive) {
+        setActiveConversationId(newActive.id);
+        setActiveTitle(newActive.title);
+        setLangA(newActive.languageA);
+        setLangB(newActive.languageB);
+        setMessages(newActive.messages);
+        setActiveSpeaker('A');
+      }
+      setSummaries(getConversationSummaries(updatedStore));
+    }
+    setError(null);
+    setPlayError(null);
+  }
+
+  // ── Conversation workflow ──────────────────────────────────────────────────
 
   function handleSwap() {
     // History is immutable — messages retain their original language pairs.
@@ -76,11 +202,12 @@ export function ConversationMode({ languages }: Props) {
   }
 
   function handleClear() {
+    // Clear = remove messages from active conversation. Conversation itself is preserved.
     setMessages([]);
     setActiveSpeaker('A');
     setError(null);
     setPlayError(null);
-    clearSession();
+    // The save effect persists the empty message list to the store.
   }
 
   async function tryAutoPlay(translatedText: string, targetLanguage: string) {
@@ -128,9 +255,7 @@ export function ConversationMode({ languages }: Props) {
       setMessages((prev) => [...prev, msg]);
       setActiveSpeaker(speaker === 'A' ? 'B' : 'A');
 
-      if (autoPlay) {
-        await tryAutoPlay(data.translatedText, targetLang);
-      }
+      if (autoPlay) await tryAutoPlay(data.translatedText, targetLang);
     } catch (err: unknown) {
       const apiErr = err as { message?: string };
       setError(apiErr?.message ?? 'Translation failed. Please try again.');
@@ -163,9 +288,7 @@ export function ConversationMode({ languages }: Props) {
       setMessages((prev) => [...prev, msg]);
       setActiveSpeaker(speaker === 'A' ? 'B' : 'A');
 
-      if (autoPlay) {
-        await tryAutoPlay(data.translatedText, targetLang);
-      }
+      if (autoPlay) await tryAutoPlay(data.translatedText, targetLang);
     } catch (err: unknown) {
       const apiErr = err as { message?: string };
       setError(apiErr?.message ?? 'Translation failed. Please try again.');
@@ -174,15 +297,20 @@ export function ConversationMode({ languages }: Props) {
     }
   }
 
+  // ── Export handlers ────────────────────────────────────────────────────────
+
   function handleExportTxt() {
-    exportAsTxt(messages, langAName, langBName);
+    exportAsTxt(messages, langAName, langBName, activeTitle);
   }
 
   function handleExportJson() {
+    const now = new Date().toISOString();
     const session: ConversationSession = {
+      id: activeConversationId ?? '',
+      title: activeTitle,
       version: CONVERSATION_STORAGE_VERSION,
-      createdAt: messages[0]?.timestamp ?? new Date().toISOString(),
-      updatedAt: messages[messages.length - 1]?.timestamp ?? new Date().toISOString(),
+      createdAt: messages[0]?.timestamp ?? now,
+      updatedAt: messages[messages.length - 1]?.timestamp ?? now,
       languageA: langA,
       languageB: langB,
       messages,
@@ -193,7 +321,7 @@ export function ConversationMode({ languages }: Props) {
   async function handleCopy() {
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     try {
-      await copyToClipboard(messages, langAName, langBName);
+      await copyToClipboard(messages, langAName, langBName, activeTitle);
       setCopyStatus('copied');
       copyTimerRef.current = setTimeout(() => setCopyStatus('idle'), 2000);
     } catch {
@@ -204,12 +332,25 @@ export function ConversationMode({ languages }: Props) {
 
   const copyLabel =
     copyStatus === 'copied' ? 'Copied!' :
-    copyStatus === 'error' ? 'Failed' :
+    copyStatus === 'error'  ? 'Failed'  :
     'Copy';
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="conversation-mode">
       <div className="conv-lang-header">
+        <ConversationManager
+          summaries={summaries}
+          activeId={activeConversationId}
+          activeTitle={activeTitle}
+          loading={loading}
+          onNew={handleNew}
+          onSwitch={handleSwitch}
+          onRename={handleRename}
+          onDelete={handleDelete}
+        />
+
         <div className="lang-pair-row">
           <LanguageSelect
             id="conv-lang-a"

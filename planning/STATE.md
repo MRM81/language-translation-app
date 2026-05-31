@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 015 (Conversation Persistence & Export) is complete. localStorage persistence, session restore, TXT/JSON export, and clipboard copy added to Conversation Mode. All browser-only — no backend changes. 133/133 tests pass. TypeScript clean. Build clean.
+Sprint 016 (Multi-Conversation Management) is complete. Multiple named conversations, create/switch/rename/delete, Sprint 015 migration, all browser-only. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,27 @@ Sprint 015 (Conversation Persistence & Export) is complete. localStorage persist
 
 ## Active Sprint
 
-None. Sprint 015 is complete. Recommended next sprint: Sprint 016 — Multi-Conversation Management.
+None. Sprint 016 is complete. Recommended next sprint: Sprint 017 — Conversation Search, Titles & Demo Polish.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 016 — Multi-Conversation Management
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/types/conversation.ts` — `ConversationSession` extended with `id` and `title`; `ConversationStore`, `ConversationSummary`, `CONVERSATION_STORE_VERSION = 1` added
+- `src/frontend/src/services/ConversationStorageService.ts` — complete rewrite; `loadOrMigrateStore()` entry point with Sprint 015 one-time migration; pure CRUD functions (`createConversation`, `updateConversation`, `renameConversation`, `deleteConversation`, `switchConversation`, `getConversationSummaries`, `getActiveSession`)
+- `src/frontend/src/services/ConversationExportService.ts` — optional `title` parameter added to `exportAsTxt` and `copyToClipboard`; TXT format includes conversation title header
+- `src/frontend/src/components/ConversationManager.tsx` — new component: conversation selector dropdown, New/Rename/Delete controls, inline rename with Enter/Escape keyboard support, `window.confirm()` delete
+- `src/frontend/src/components/ConversationMode.tsx` — multi-conversation state (`activeConversationId`, `activeTitle`, `summaries`); mount loads/migrates store; save effect persists active session; `handleNew`, `handleSwitch`, `handleRename`, `handleDelete`; `handleClear` no longer removes storage (only clears messages)
+- `src/frontend/src/styles/app.css` — `.conv-manager-row`, `.conv-manager-selector`, `.conv-manager-select`, `.conv-manager-rename-input`, `.conv-manager-actions`; mobile overrides
+- Storage key: `my-translation-app-conversations` (plural); legacy `my-translation-app-conversation` migrated and removed
+- Delete uses `window.confirm()` (D-105); delete of last conversation auto-creates "Conversation 1"
+- D-102 to D-105 added; Q-058 to Q-061 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 015 — Conversation Persistence & Export
 Status: Completed
@@ -318,7 +334,7 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 016 — Multi-Conversation Management (recommended next sprint per Architect Pack 015).
+1. Sprint 017 — Conversation Search, Titles & Demo Polish (recommended next sprint per Architect Pack 016).
 2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
@@ -327,7 +343,7 @@ Outcomes:
 
 ## Last Updated
 
-2026-05-31 (Sprint 015 complete — conversation persistence and export added)
+2026-05-31 (Sprint 016 complete — multi-conversation management added)
 
 ---
 
