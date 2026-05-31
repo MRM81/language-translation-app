@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 016 (Multi-Conversation Management) is complete. Multiple named conversations, create/switch/rename/delete, Sprint 015 migration, all browser-only. 133/133 tests pass. TypeScript clean. Build clean.
+Sprint 017 (Conversation Search & Demo Polish) is complete. Conversation search (title + all message text), preview snippets, auto-title from first message, improved empty states, all browser-only. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,25 @@ Sprint 016 (Multi-Conversation Management) is complete. Multiple named conversat
 
 ## Active Sprint
 
-None. Sprint 016 is complete. Recommended next sprint: Sprint 017 — Conversation Search, Titles & Demo Polish.
+None. Sprint 017 is complete. Recommended next sprint: Sprint 018 — UI/UX Redesign.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 017 — Conversation Search & Demo Polish
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/types/conversation.ts` — `ConversationSession` extended with `isAutoTitle?: boolean`; `ConversationSummary` extended with `previewText?: string` (computed, not stored)
+- `src/frontend/src/services/ConversationStorageService.ts` — `createConversation` sets `isAutoTitle: true`; `renameConversation` sets `isAutoTitle: false`; `getConversationSummaries` computes `previewText` from last message (`translatedText` preferred, fallback `originalText`)
+- `src/frontend/src/components/ConversationManager.tsx` — search input with clear button (shown when >1 conversation or query active); enhanced `<select>` option labels (`Title (N) · preview…`); "no results" empty state with inline Clear link; new props: `searchQuery`, `onSearchChange`, `allCount`
+- `src/frontend/src/components/ConversationMode.tsx` — `searchQuery` and `isAutoTitle` state; `filteredSummaries` via `useMemo` with full message-text search via `loadStore()`; active conversation always included in filtered list; `applyAutoTitleIfNeeded()` sets title from first 40 chars of first `originalText`; all handlers updated to restore/reset `isAutoTitle`; save effect persists `isAutoTitle`
+- `src/frontend/src/components/ConversationHistory.tsx` — empty state text: "No messages yet. Use Record, Text, or Audio File to start."
+- `src/frontend/src/styles/app.css` — `.conv-search-wrap`, `.conv-search-input`, `.conv-search-clear`, `.conv-empty-search`, `.conv-search-reset-link`; mobile override
+- D-106 to D-109 added; Q-062 to Q-065 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 016 — Multi-Conversation Management
 Status: Completed
@@ -334,7 +348,7 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 017 — Conversation Search, Titles & Demo Polish (recommended next sprint per Architect Pack 016).
+1. Sprint 018 — UI/UX Redesign (recommended next sprint per Architect Pack 017).
 2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
@@ -343,7 +357,7 @@ Outcomes:
 
 ## Last Updated
 
-2026-05-31 (Sprint 016 complete — multi-conversation management added)
+2026-05-31 (Sprint 017 complete — conversation search, auto-title, preview snippets, empty states added)
 
 ---
 

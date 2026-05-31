@@ -2,21 +2,37 @@ import { useRef, useState } from 'react';
 import type { ConversationSummary } from '../types/conversation';
 
 interface Props {
-  summaries: ConversationSummary[];
+  summaries: ConversationSummary[];       // pre-filtered by parent
+  allCount: number;                        // total before filtering (for no-results state)
   activeId: string | null;
   activeTitle: string;
   loading: boolean;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
   onNew: () => void;
   onSwitch: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
 }
 
+function truncate(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max).trimEnd() + '…' : text;
+}
+
+function buildOptionLabel(s: ConversationSummary): string {
+  const count = s.messageCount > 0 ? ` (${s.messageCount})` : '';
+  const preview = s.previewText ? ` · ${truncate(s.previewText, 35)}` : '';
+  return `${s.title}${count}${preview}`;
+}
+
 export function ConversationManager({
   summaries,
+  allCount,
   activeId,
   activeTitle,
   loading,
+  searchQuery,
+  onSearchChange,
   onNew,
   onSwitch,
   onRename,
@@ -25,6 +41,10 @@ export function ConversationManager({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const showSearch = allCount > 1 || searchQuery.length > 0;
+  const noResults = searchQuery.trim() !== '' && summaries.length === 0 && allCount > 0;
 
   function startRename() {
     setRenameValue(activeTitle);
@@ -51,43 +71,81 @@ export function ConversationManager({
 
   function handleDelete() {
     if (!activeId) return;
-    const title = summaries.find((s) => s.id === activeId)?.title ?? 'this conversation';
+    const title = summaries.find((s) => s.id === activeId)?.title ?? activeTitle;
     if (window.confirm(`Delete "${title}"? This cannot be undone.`)) {
       onDelete(activeId);
     }
   }
 
+  function clearSearch() {
+    onSearchChange('');
+    searchInputRef.current?.focus();
+  }
+
   return (
     <div className="conv-manager-row">
-      <div className="conv-manager-selector">
-        <span className="conv-manager-label">Conversation</span>
-        {isRenaming ? (
+      {showSearch && (
+        <div className="conv-search-wrap">
           <input
-            ref={renameInputRef}
-            type="text"
-            className="conv-manager-rename-input"
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={handleRenameKeyDown}
-            aria-label="Conversation name"
-            maxLength={60}
+            ref={searchInputRef}
+            type="search"
+            className="conv-search-input"
+            placeholder="Search conversations…"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            aria-label="Search conversations"
           />
-        ) : (
-          <select
-            className="conv-manager-select"
-            value={activeId ?? ''}
-            onChange={(e) => onSwitch(e.target.value)}
-            disabled={loading}
-            aria-label="Select conversation"
-          >
-            {summaries.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}{s.messageCount > 0 ? ` (${s.messageCount})` : ''}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+          {searchQuery && (
+            <button
+              type="button"
+              className="conv-search-clear"
+              onClick={clearSearch}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      )}
+
+      {noResults ? (
+        <p className="conv-empty-search" role="status">
+          No conversations match your search.{' '}
+          <button type="button" className="conv-search-reset-link" onClick={clearSearch}>
+            Clear search
+          </button>
+        </p>
+      ) : (
+        <div className="conv-manager-selector">
+          <span className="conv-manager-label">Conversation</span>
+          {isRenaming ? (
+            <input
+              ref={renameInputRef}
+              type="text"
+              className="conv-manager-rename-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={handleRenameKeyDown}
+              aria-label="Conversation name"
+              maxLength={60}
+            />
+          ) : (
+            <select
+              className="conv-manager-select"
+              value={activeId ?? ''}
+              onChange={(e) => onSwitch(e.target.value)}
+              disabled={loading}
+              aria-label="Select conversation"
+            >
+              {summaries.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {buildOptionLabel(s)}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <div className="conv-manager-actions">
         {isRenaming ? (

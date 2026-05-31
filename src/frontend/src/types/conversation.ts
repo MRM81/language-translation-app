@@ -14,6 +14,7 @@ export const CONVERSATION_STORAGE_VERSION = 1;
 export interface ConversationSession {
   id: string;
   title: string;
+  isAutoTitle?: boolean;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -38,4 +39,5 @@ export interface ConversationSummary {
   messageCount: number;
   languageA: string;
   languageB: string;
+  previewText?: string;
 }

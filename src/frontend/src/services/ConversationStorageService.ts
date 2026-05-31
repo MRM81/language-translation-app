@@ -150,15 +150,22 @@ export function loadOrMigrateStore(): ConversationStore {
 
 export function getConversationSummaries(store: ConversationStore): ConversationSummary[] {
   return Object.values(store.conversations)
-    .map((s) => ({
-      id: s.id,
-      title: s.title,
-      createdAt: s.createdAt,
-      updatedAt: s.updatedAt,
-      messageCount: s.messages.length,
-      languageA: s.languageA,
-      languageB: s.languageB,
-    }))
+    .map((s) => {
+      const lastMsg = s.messages[s.messages.length - 1];
+      const previewText = lastMsg
+        ? (lastMsg.translatedText || lastMsg.originalText) || undefined
+        : undefined;
+      return {
+        id: s.id,
+        title: s.title,
+        createdAt: s.createdAt,
+        updatedAt: s.updatedAt,
+        messageCount: s.messages.length,
+        languageA: s.languageA,
+        languageB: s.languageB,
+        previewText,
+      };
+    })
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
@@ -178,6 +185,7 @@ export function createConversation(
   const session: ConversationSession = {
     id,
     title,
+    isAutoTitle: true,
     version: CONVERSATION_STORAGE_VERSION,
     createdAt: now,
     updatedAt: now,
@@ -214,7 +222,7 @@ export function renameConversation(
   if (!existing) return store;
   return {
     ...store,
-    conversations: { ...store.conversations, [id]: { ...existing, title } },
+    conversations: { ...store.conversations, [id]: { ...existing, title, isAutoTitle: false } },
   };
 }
 

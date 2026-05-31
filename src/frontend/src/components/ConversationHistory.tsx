@@ -18,7 +18,7 @@ export function ConversationHistory({ messages, langAName, langBName }: Props) {
   if (messages.length === 0) {
     return (
       <div className="conv-history conv-history--empty" aria-live="polite">
-        <p>Conversation will appear here. Select languages above and start translating.</p>
+        <p>No messages yet. Use Record, Text, or Audio File to start.</p>
       </div>
     );
   }

@@ -290,6 +290,30 @@
 
 ---
 
+## Sprint Files (Sprint 017)
+
+| File | Purpose |
+|------|---------|
+| planning/sprints/017-conversation-search-demo-polish/requirements.md | Sprint 017 requirements |
+| planning/sprints/017-conversation-search-demo-polish/blueprint.md | Sprint 017 implementation notes |
+| planning/sprints/017-conversation-search-demo-polish/acceptance.md | Sprint 017 acceptance criteria |
+| planning/sprints/017-conversation-search-demo-polish/handoff-prompt.md | Sprint 018 Builder handoff prompt |
+
+---
+
+## Modified Files (Sprint 017)
+
+| File | Change |
+|------|---------|
+| src/frontend/src/types/conversation.ts | Added `isAutoTitle?: boolean` to `ConversationSession`; added `previewText?: string` to `ConversationSummary` |
+| src/frontend/src/services/ConversationStorageService.ts | `createConversation` sets `isAutoTitle: true`; `renameConversation` sets `isAutoTitle: false`; `getConversationSummaries` computes `previewText` |
+| src/frontend/src/components/ConversationManager.tsx | Added search input, enhanced option labels, no-results empty state; props: `searchQuery`, `onSearchChange`, `allCount` |
+| src/frontend/src/components/ConversationMode.tsx | Added `searchQuery` and `isAutoTitle` state; `filteredSummaries` via `useMemo`; `applyAutoTitleIfNeeded()` auto-title logic |
+| src/frontend/src/components/ConversationHistory.tsx | Improved empty state text |
+| src/frontend/src/styles/app.css | Added `.conv-search-wrap`, `.conv-search-input`, `.conv-search-clear`, `.conv-empty-search`, `.conv-search-reset-link` and mobile overrides |
+
+---
+
 ## To Be Discovered
 
 - Implementation repository location (GitHub / TBD)

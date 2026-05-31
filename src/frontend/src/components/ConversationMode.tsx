@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { synthesizeSpeech, translateAudio, translateText } from '../api/translationApi';
 import { copyToClipboard, exportAsJson, exportAsTxt } from '../services/ConversationExportService';
 import {
@@ -40,6 +40,11 @@ function defaultTitle(store: ConversationStore): string {
   return `Conversation ${Object.keys(store.conversations).length + 1}`;
 }
 
+function buildAutoTitle(text: string): string {
+  const trimmed = text.trim();
+  return trimmed.length > 40 ? trimmed.slice(0, 40).trimEnd() + '…' : trimmed;
+}
+
 export function ConversationMode({ languages }: Props) {
   const [langA, setLangA] = useState('');
   const [langB, setLangB] = useState('');
@@ -52,7 +57,9 @@ export function ConversationMode({ languages }: Props) {
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeTitle, setActiveTitle] = useState('');
+  const [isAutoTitle, setIsAutoTitle] = useState(false);
   const [summaries, setSummaries] = useState<ConversationSummary[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -68,6 +75,7 @@ export function ConversationMode({ languages }: Props) {
     if (active) {
       setActiveConversationId(active.id);
       setActiveTitle(active.title);
+      setIsAutoTitle(active.isAutoTitle ?? false);
       setLangA(active.languageA);
       setLangB(active.languageB);
       setMessages(active.messages);
@@ -78,6 +86,7 @@ export function ConversationMode({ languages }: Props) {
       saveStore(newStore);
       setActiveConversationId(id);
       setActiveTitle('Conversation 1');
+      setIsAutoTitle(true);
       setSummaries(getConversationSummaries(newStore));
     }
   }, []);
@@ -93,6 +102,7 @@ export function ConversationMode({ languages }: Props) {
     const session: ConversationSession = {
       id: activeConversationId,
       title: activeTitle,
+      isAutoTitle,
       version: CONVERSATION_STORAGE_VERSION,
       createdAt: messages[0]?.timestamp ?? currentStore.conversations[activeConversationId]?.createdAt ?? now,
       updatedAt: messages[messages.length - 1]?.timestamp ?? now,
@@ -103,7 +113,7 @@ export function ConversationMode({ languages }: Props) {
     const updated = updateConversation(currentStore, session);
     saveStore(updated);
     setSummaries(getConversationSummaries(updated));
-  }, [messages, langA, langB, activeConversationId, activeTitle]);
+  }, [messages, langA, langB, activeConversationId, activeTitle, isAutoTitle]);
 
   // ── Clean up copy timer on unmount ─────────────────────────────────────────
 
@@ -112,6 +122,28 @@ export function ConversationMode({ languages }: Props) {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     };
   }, []);
+
+  // ── Filtered summaries for search ─────────────────────────────────────────
+
+  const filteredSummaries = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return summaries;
+
+    const store = loadStore();
+    return summaries.filter((summary) => {
+      // Always include the active conversation
+      if (summary.id === activeConversationId) return true;
+      if (summary.title.toLowerCase().includes(q)) return true;
+      if (!store) return false;
+      const session = store.conversations[summary.id];
+      if (!session) return false;
+      return session.messages.some(
+        (m) =>
+          m.originalText.toLowerCase().includes(q) ||
+          m.translatedText.toLowerCase().includes(q),
+      );
+    });
+  }, [searchQuery, summaries, activeConversationId]);
 
   // ── Conversation management handlers ──────────────────────────────────────
 
@@ -123,12 +155,14 @@ export function ConversationMode({ languages }: Props) {
     saveStore(newStore);
     setActiveConversationId(id);
     setActiveTitle(title);
+    setIsAutoTitle(true);
     setLangA('');
     setLangB('');
     setMessages([]);
     setActiveSpeaker('A');
     setError(null);
     setPlayError(null);
+    setSearchQuery('');
     setSummaries(getConversationSummaries(newStore));
   }
 
@@ -141,6 +175,7 @@ export function ConversationMode({ languages }: Props) {
     saveStore(updatedStore);
     setActiveConversationId(session.id);
     setActiveTitle(session.title);
+    setIsAutoTitle(session.isAutoTitle ?? false);
     setLangA(session.languageA);
     setLangB(session.languageB);
     setMessages(session.messages);
@@ -155,7 +190,10 @@ export function ConversationMode({ languages }: Props) {
     if (!currentStore) return;
     const updatedStore = renameConversation(currentStore, id, title);
     saveStore(updatedStore);
-    if (id === activeConversationId) setActiveTitle(title);
+    if (id === activeConversationId) {
+      setActiveTitle(title);
+      setIsAutoTitle(false);
+    }
     setSummaries(getConversationSummaries(updatedStore));
   }
 
@@ -170,6 +208,7 @@ export function ConversationMode({ languages }: Props) {
       saveStore(freshStore);
       setActiveConversationId(newId);
       setActiveTitle('Conversation 1');
+      setIsAutoTitle(true);
       setLangA('');
       setLangB('');
       setMessages([]);
@@ -181,6 +220,7 @@ export function ConversationMode({ languages }: Props) {
       if (newActive) {
         setActiveConversationId(newActive.id);
         setActiveTitle(newActive.title);
+        setIsAutoTitle(newActive.isAutoTitle ?? false);
         setLangA(newActive.languageA);
         setLangB(newActive.languageB);
         setMessages(newActive.messages);
@@ -190,6 +230,23 @@ export function ConversationMode({ languages }: Props) {
     }
     setError(null);
     setPlayError(null);
+  }
+
+  // ── Auto-title helper ──────────────────────────────────────────────────────
+
+  function applyAutoTitleIfNeeded(firstMessageText: string) {
+    if (!isAutoTitle || messages.length !== 0) return;
+    const autoTitle = buildAutoTitle(firstMessageText);
+    setActiveTitle(autoTitle);
+    setIsAutoTitle(false);
+    // Persist the new title immediately (save effect will also fire, but set state first)
+    const currentStore = loadStore();
+    if (!currentStore || !activeConversationId) return;
+    const existing = currentStore.conversations[activeConversationId];
+    if (!existing) return;
+    const updated = updateConversation(currentStore, { ...existing, title: autoTitle, isAutoTitle: false });
+    saveStore(updated);
+    setSummaries(getConversationSummaries(updated));
   }
 
   // ── Conversation workflow ──────────────────────────────────────────────────
@@ -242,6 +299,8 @@ export function ConversationMode({ languages }: Props) {
         targetLanguage: targetLang,
       });
 
+      applyAutoTitleIfNeeded(text);
+
       const msg: ConversationMessage = {
         id: generateId(),
         speaker,
@@ -274,6 +333,8 @@ export function ConversationMode({ languages }: Props) {
 
     try {
       const data = await translateAudio(file, targetLang, sourceLang);
+
+      applyAutoTitleIfNeeded(data.transcribedText);
 
       const msg: ConversationMessage = {
         id: generateId(),
@@ -308,6 +369,7 @@ export function ConversationMode({ languages }: Props) {
     const session: ConversationSession = {
       id: activeConversationId ?? '',
       title: activeTitle,
+      isAutoTitle,
       version: CONVERSATION_STORAGE_VERSION,
       createdAt: messages[0]?.timestamp ?? now,
       updatedAt: messages[messages.length - 1]?.timestamp ?? now,
@@ -341,10 +403,13 @@ export function ConversationMode({ languages }: Props) {
     <div className="conversation-mode">
       <div className="conv-lang-header">
         <ConversationManager
-          summaries={summaries}
+          summaries={filteredSummaries}
+          allCount={summaries.length}
           activeId={activeConversationId}
           activeTitle={activeTitle}
           loading={loading}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           onNew={handleNew}
           onSwitch={handleSwitch}
           onRename={handleRename}
