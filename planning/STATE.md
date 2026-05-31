@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 017 (Conversation Search & Demo Polish) is complete. Conversation search (title + all message text), preview snippets, auto-title from first message, improved empty states, all browser-only. 133/133 tests pass. TypeScript clean. Build clean.
+Sprint 018 (UI/UX Redesign) is complete. Landing page added as first screen, logo and favicon configured, Translation Mode now uses a Text/Audio segmented toggle showing one form at a time, workspace header updated with logo. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,25 @@ Sprint 017 (Conversation Search & Demo Polish) is complete. Conversation search 
 
 ## Active Sprint
 
-None. Sprint 017 is complete. Recommended next sprint: Sprint 018 — UI/UX Redesign.
+None. Sprint 018 is complete. Recommended next sprint: Sprint 019 — Production Refresh & Portfolio Assets.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 018 — UI/UX Redesign
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/public/logo.png` — copied from `design/inspiration/logo.png`
+- `src/frontend/public/favicon.png` — copied from `design/inspiration/favicon.png`
+- `src/frontend/index.html` — `<link rel="icon" type="image/png" href="/favicon.png" />` added
+- `src/frontend/src/components/LandingPage.tsx` — new component: logo, product name, description, feature bullets, "Start Translating" CTA, responsive
+- `src/frontend/src/App.tsx` — `screen: 'landing' | 'workspace'` state (defaults to `'landing'`); `translationInputMode: 'text' | 'audio'` state (defaults to `'text'`); renders `<LandingPage>` when `screen === 'landing'`; workspace header replaced with logo + tagline; `.forms-grid` removed; segmented `translation-tabs` toggle with single-form display; `handleTranslationInputModeChange` clears result/error on tab switch
+- `src/frontend/src/styles/app.css` — `.app-header` refactored to left-aligned with `.app-header-inner`, `.app-header-logo`, `.app-header-tagline`; `.forms-grid` removed; `.landing-page`, `.landing-hero`, `.landing-logo`, `.landing-description`, `.landing-cta`, `.landing-features`, `.landing-tech` added; `.translation-tabs` / `.translation-tab` segmented toggle added; mobile overrides updated
+- D-110 to D-114 added; Q-066 to Q-069 added; R-055 to R-057 added
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 017 — Conversation Search & Demo Polish
 Status: Completed
@@ -348,16 +362,16 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 018 — UI/UX Redesign (recommended next sprint per Architect Pack 017).
-2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
+1. Sprint 019 — Production Refresh & Portfolio Assets (recommended next sprint).
+2. Custom domain (Q-046/Q-069) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
 5. SSM Parameter Store for Azure credentials (R-053 mitigation).
-6. Optionally: custom dropdown with per-language capability badges (deferred from Sprint 009B).
+6. Route-based navigation (Q-068) — improves deep-linking and back-button behaviour.
 
 ## Last Updated
 
-2026-05-31 (Sprint 017 complete — conversation search, auto-title, preview snippets, empty states added)
+2026-05-31 (Sprint 018 complete — landing page, logo, favicon, Translation toggle, workspace header redesign)
 
 ---
 

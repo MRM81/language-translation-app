@@ -314,6 +314,39 @@
 
 ---
 
+---
+
+## Sprint Files (Sprint 018)
+
+| File | Purpose |
+|------|---------|
+| planning/sprints/018-ui-ux-redesign/requirements.md | Sprint 018 requirements |
+| planning/sprints/018-ui-ux-redesign/blueprint.md | Sprint 018 implementation notes |
+| planning/sprints/018-ui-ux-redesign/acceptance.md | Sprint 018 acceptance criteria |
+| planning/sprints/018-ui-ux-redesign/handoff-prompt.md | Sprint 019 Builder handoff prompt |
+
+---
+
+## New Files (Sprint 018)
+
+| File | Purpose |
+|------|---------|
+| src/frontend/public/logo.png | App logo asset — copied from design/inspiration/logo.png |
+| src/frontend/public/favicon.png | Browser favicon — copied from design/inspiration/favicon.png |
+| src/frontend/src/components/LandingPage.tsx | Landing page component — logo, description, feature list, Start Translating CTA |
+
+---
+
+## Modified Files (Sprint 018)
+
+| File | Change |
+|------|---------|
+| src/frontend/index.html | Added `<link rel="icon" type="image/png" href="/favicon.png" />` |
+| src/frontend/src/App.tsx | Added `screen: 'landing' \| 'workspace'` and `translationInputMode: 'text' \| 'audio'` state; renders LandingPage when landing; workspace header now uses logo image; `.forms-grid` replaced with segmented translation toggle |
+| src/frontend/src/styles/app.css | `.app-header` refactored to logo+tagline layout; `.forms-grid` removed; `.landing-page` hero styles added; `.translation-tabs` / `.translation-tab` segmented toggle added; mobile overrides updated |
+
+---
+
 ## To Be Discovered
 
 - Implementation repository location (GitHub / TBD)

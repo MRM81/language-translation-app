@@ -3,18 +3,24 @@ import { fetchLanguages } from './api/translationApi';
 import { AudioTranslationForm } from './components/AudioTranslationForm';
 import { ConversationMode } from './components/ConversationMode';
 import { ErrorPanel } from './components/ErrorPanel';
+import { LandingPage } from './components/LandingPage';
 import { ResultPanel } from './components/ResultPanel';
 import { TextTranslationForm } from './components/TextTranslationForm';
 import './styles/app.css';
 import type { ApiErrorResponse, LanguageOption, TranslationResult } from './types/api';
 
-type AppMode = 'translate' | 'conversation';
+type Screen = 'landing' | 'workspace';
+type WorkspaceMode = 'translate' | 'conversation';
+type TranslationInputMode = 'text' | 'audio';
 
 export function App() {
+  const [screen, setScreen] = useState<Screen>('landing');
+  const [mode, setMode] = useState<WorkspaceMode>('translate');
+  const [translationInputMode, setTranslationInputMode] = useState<TranslationInputMode>('text');
+
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
   const [languagesLoading, setLanguagesLoading] = useState(true);
   const [languagesError, setLanguagesError] = useState('');
-  const [mode, setMode] = useState<AppMode>('translate');
 
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [error, setError] = useState<ApiErrorResponse | string | null>(null);
@@ -45,11 +51,29 @@ export function App() {
     setResult(null);
   }
 
+  function handleTranslationInputModeChange(next: TranslationInputMode) {
+    setTranslationInputMode(next);
+    setResult(null);
+    setError(null);
+  }
+
+  if (screen === 'landing') {
+    return <LandingPage onStart={() => setScreen('workspace')} />;
+  }
+
   return (
     <>
       <header className="app-header">
-        <h1>My Translation App</h1>
-        <p>Translate text or audio between languages.</p>
+        <div className="app-header-inner">
+          <button
+            type="button"
+            className="app-header-logo-btn"
+            onClick={() => setScreen('landing')}
+            aria-label="Return to home"
+          >
+            <img src="/logo.png" alt="My Translation App logo" className="app-header-logo" />
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
@@ -87,20 +111,42 @@ export function App() {
 
             {mode === 'translate' && (
               <>
-                <div className="forms-grid">
+                <div className="translation-tabs" role="group" aria-label="Translation input type">
+                  <button
+                    type="button"
+                    className={`translation-tab${translationInputMode === 'text' ? ' active' : ''}`}
+                    onClick={() => handleTranslationInputModeChange('text')}
+                    aria-pressed={translationInputMode === 'text'}
+                  >
+                    Text Translation
+                  </button>
+                  <button
+                    type="button"
+                    className={`translation-tab${translationInputMode === 'audio' ? ' active' : ''}`}
+                    onClick={() => handleTranslationInputModeChange('audio')}
+                    aria-pressed={translationInputMode === 'audio'}
+                  >
+                    Audio Translation
+                  </button>
+                </div>
+
+                {translationInputMode === 'text' && (
                   <TextTranslationForm
                     languages={languages}
                     onResult={handleResult}
                     onError={handleError}
                     onSubmitStart={handleSubmitStart}
                   />
+                )}
+
+                {translationInputMode === 'audio' && (
                   <AudioTranslationForm
                     languages={languages}
                     onResult={handleResult}
                     onError={handleError}
                     onSubmitStart={handleSubmitStart}
                   />
-                </div>
+                )}
 
                 <div className="results-area" aria-live="polite" aria-atomic="false">
                   {error ? (
