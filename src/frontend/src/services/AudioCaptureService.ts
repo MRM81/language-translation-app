@@ -1,11 +1,13 @@
-// Preferred MIME type order for MediaRecorder (D-056).
+// Preferred MIME type order for MediaRecorder (D-056, D-094).
 // Chrome/Edge produce audio/webm;codecs=opus. Firefox produces audio/ogg;codecs=opus.
+// audio/mp4 added as iOS Safari fallback (Safari 14.1+).
 // Codec params are stripped before the blob Content-Type and the backend multipart part header.
 const MIME_PREFERENCE = [
   'audio/webm;codecs=opus',
   'audio/webm',
   'audio/ogg;codecs=opus',
   'audio/ogg',
+  'audio/mp4',
 ] as const;
 
 export interface AudioCaptureResult {

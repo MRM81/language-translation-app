@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 013 (Conversation Mode) is complete. Conversation Mode added as a frontend orchestration layer over existing APIs. All acceptance criteria met. 133/133 tests pass. TypeScript clean. Build clean.
+Sprint 014 (Push-To-Talk Conversation UX) is complete. PTT recording integrated into Conversation Mode using existing Sprint 006 infrastructure. iOS Safari MIME gap resolved. All acceptance criteria met. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,23 @@ Sprint 013 (Conversation Mode) is complete. Conversation Mode added as a fronten
 
 ## Active Sprint
 
-None. Sprint 013 is complete. Recommended next sprint: Sprint 014 — Push-To-Talk Conversation UX.
+None. Sprint 014 is complete. Recommended next sprint: Sprint 015 — Conversation Persistence & Export.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 014 — Push-To-Talk Conversation UX
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- `src/frontend/src/components/ConversationInput.tsx` — Record tab added as default (PTT); tab order: Record, Text, Audio File; full `AudioCaptureService` recording lifecycle with 60s auto-stop; `onAudioSubmit` return type changed to `Promise<void>` to synchronise recording state reset with translate+TTS pipeline
+- `src/frontend/src/services/AudioCaptureService.ts` — `audio/mp4` added to MIME preference list (iOS Safari 14.1+ support, D-094)
+- No new files — `PushToTalkButton`, `RecordingIndicator`, `RecordingTimer`, `AudioCaptureService` all reused from Sprint 006 without modification
+- No backend changes
+- D-094 to D-097 added; Q-052 to Q-054 added; Q-053 resolved
+- 133/133 tests pass; TypeScript clean; build clean
 
 ### Sprint 013 — Conversation Mode
 Status: Completed
@@ -292,7 +304,7 @@ Outcomes:
 
 ## Next Actions
 
-1. Sprint 014 — Push-To-Talk Conversation UX (recommended next sprint per Architect Pack 013).
+1. Sprint 015 — Conversation Persistence & Export (recommended next sprint per Architect Pack 014).
 2. Custom domain (Q-046) — Route 53 + ACM certificate (optional post-012 enhancement).
 3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
 4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
@@ -301,7 +313,7 @@ Outcomes:
 
 ## Last Updated
 
-2026-05-31 (Sprint 013 complete — Conversation Mode added as frontend orchestration layer)
+2026-05-31 (Sprint 014 complete — PTT recording integrated into Conversation Mode)
 
 ---
 
