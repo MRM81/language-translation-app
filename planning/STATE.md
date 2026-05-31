@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Sprint 018 (UI/UX Redesign) is complete. Landing page added as first screen, logo and favicon configured, Translation Mode now uses a Text/Audio segmented toggle showing one form at a time, workspace header updated with logo. 133/133 tests pass. TypeScript clean. Build clean.
+**v1.0 COMPLETE.** Sprint 019 (Production Refresh & Portfolio Assets) is complete. Frontend deployed to AWS production (S3 + CloudFront). All portfolio assets updated. 8 v1.0 screenshots captured. 133/133 tests pass. TypeScript clean. Build clean.
 
 **Project:** My Translation App
 **Client:** Acme Corp
@@ -21,11 +21,28 @@ Sprint 018 (UI/UX Redesign) is complete. Landing page added as first screen, log
 
 ## Active Sprint
 
-None. Sprint 018 is complete. Recommended next sprint: Sprint 019 — Production Refresh & Portfolio Assets.
+None. **My Translation App v1.0 is complete.** All planned sprints (001–019) are delivered.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 019 — Production Refresh & Portfolio Assets
+Status: Completed
+Completed: 2026-05-31
+
+Outcomes:
+- Frontend deployed to AWS production: S3 sync + CloudFront invalidation (user-executed)
+- `portfolio/case-study.md` — updated to cover Sprints 009–019, full v1.0 feature set, technology stack, AWS deployment
+- `portfolio/architecture-overview.md` — updated with AWS deployment diagram, Conversation Mode, full component list, storage schema
+- `portfolio/demo-script.md` — updated to 7–8 min covering all features: landing page, text translation, audio translation, conversation mode, multi-conversation management, search, export, architecture
+- `portfolio/lessons-learned.md` — updated with Sprints 009–018 lessons
+- `portfolio/release-notes-v1.md` — new file: major features, technology stack, production environment, known limitations, future ideas
+- `design/screenshots/v1/` — 8 screenshots captured from local v1.0 build via Playwright: landing-page, translation-mode, audio-translation, conversation-mode, push-to-talk, conversation-manager, conversation-search, mobile-view
+- `design/screenshots/take-v1.mjs` — Playwright screenshot script for v1
+- D-115 to D-119 added; Q-070 to Q-073 added; R-058 to R-062 added
+- 133/133 tests pass; TypeScript clean; build clean
+- **My Translation App v1.0 COMPLETE**
 
 ### Sprint 018 — UI/UX Redesign
 Status: Completed
@@ -360,18 +377,18 @@ Outcomes:
 
 ---
 
-## Next Actions
+## Post-v1 Candidates (no active sprint)
 
-1. Sprint 019 — Production Refresh & Portfolio Assets (recommended next sprint).
-2. Custom domain (Q-046/Q-069) — Route 53 + ACM certificate (optional post-012 enhancement).
-3. CI/CD pipeline (Q-047) — GitHub Actions or AWS CodePipeline (optional post-012 enhancement).
-4. Load-balanced EB with HTTPS (Q-048) — required for separate-origin pattern and direct HTTPS to EB.
-5. SSM Parameter Store for Azure credentials (R-053 mitigation).
-6. Route-based navigation (Q-068) — improves deep-linking and back-button behaviour.
+1. Custom domain — Route 53 + ACM certificate (Q-070)
+2. Demo video recording and hosting (Q-071)
+3. CI/CD pipeline — GitHub Actions or AWS CodePipeline (Q-047)
+4. Route-based navigation — deep-linking, back-button behaviour (Q-068)
+5. SSM Parameter Store for Azure credentials (R-053 mitigation)
+6. Cloud sync / authentication / user accounts (post-v1 roadmap)
 
 ## Last Updated
 
-2026-05-31 (Sprint 018 complete — landing page, logo, favicon, Translation toggle, workspace header redesign)
+2026-05-31 (Sprint 019 complete — v1.0 released, production deployed, portfolio assets complete)
 
 ---
 

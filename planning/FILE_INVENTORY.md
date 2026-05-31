@@ -347,8 +347,51 @@
 
 ---
 
-## To Be Discovered
+---
 
-- Implementation repository location (GitHub / TBD)
-- Provider SDK packages (Azure SDK, etc. — after provider choice confirmed)
-- Environment configuration files (.env structure — after implementation sprint)
+## Sprint Files (Sprint 019)
+
+| File | Purpose |
+|------|---------|
+| planning/sprints/019-production-refresh-portfolio-assets/requirements.md | Sprint 019 requirements |
+| planning/sprints/019-production-refresh-portfolio-assets/blueprint.md | Sprint 019 implementation notes |
+| planning/sprints/019-production-refresh-portfolio-assets/acceptance.md | Sprint 019 acceptance criteria |
+| planning/sprints/019-production-refresh-portfolio-assets/handoff-prompt.md | Post-v1 handoff note |
+
+---
+
+## New / Updated Files (Sprint 019)
+
+| File | Action | Purpose |
+|------|---------|---------|
+| portfolio/case-study.md | Updated | Full v1.0 case study covering all 19 sprints |
+| portfolio/architecture-overview.md | Updated | v1.0 architecture with AWS, Conversation Mode, storage schema |
+| portfolio/demo-script.md | Updated | 7–8 min demo script covering all features |
+| portfolio/lessons-learned.md | Updated | Full sprint-by-sprint retrospective through Sprint 018 |
+| portfolio/release-notes-v1.md | Created | v1.0 release notes — features, stack, environment, limitations |
+| design/screenshots/v1/ | Created | 8 portfolio-quality screenshots from local v1.0 build |
+| design/screenshots/take-v1.mjs | Created | Playwright script for v1 screenshots |
+| design/screenshots/take-v1-remaining.mjs | Created | Playwright script for remaining screenshots (seed fix) |
+
+---
+
+## Screenshots (Sprint 019)
+
+| File | Content |
+|------|---------|
+| design/screenshots/v1/landing-page.png | Landing page — logo, description, CTA |
+| design/screenshots/v1/translation-mode.png | Text Translation workspace |
+| design/screenshots/v1/audio-translation.png | Audio Translation tab |
+| design/screenshots/v1/conversation-mode.png | Conversation Mode empty state |
+| design/screenshots/v1/push-to-talk.png | Push-To-Talk record tab |
+| design/screenshots/v1/conversation-manager.png | Multi-conversation manager with 3 conversations |
+| design/screenshots/v1/conversation-search.png | Conversation search with "French" query |
+| design/screenshots/v1/mobile-view.png | Landing page at 375px mobile viewport |
+
+---
+
+## Project Status
+
+**My Translation App v1.0 — COMPLETE**
+
+All 19 sprints delivered. Live on AWS at https://d2ftspeokj49uq.cloudfront.net

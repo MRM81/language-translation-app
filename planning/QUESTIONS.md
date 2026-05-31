@@ -77,3 +77,7 @@ Track open questions that require client, Architect, or stakeholder input.
 | Q-067 | 2026-05-31 | Should the landing page later include testimonials, pricing, or public marketing content? | Owner | No | Open | TBD. Landing page is intentionally minimal for v1. Marketing content deferred. |
 | Q-068 | 2026-05-31 | Should the app use route-based navigation in a future sprint? | Owner | No | Open | TBD. Sprint 018 uses simple state (screen: landing | workspace). Routes would improve deep-linking and back-button behaviour. |
 | Q-069 | 2026-05-31 | Should a custom domain be added in Sprint 019? | Owner | No | Open | TBD. Custom domain (Route 53 + ACM) was noted as an optional post-012 enhancement (Q-046). Sprint 019 is the natural time to revisit. |
+| Q-070 | 2026-05-31 | Should a custom domain be configured post-v1? | Owner | No | Open | TBD. Route 53 + ACM certificate. Deferred from Sprint 019. |
+| Q-071 | 2026-05-31 | Should a public demo video be hosted? | Owner | No | Open | TBD. A recorded walkthrough would complement the portfolio case study and screenshots. |
+| Q-072 | 2026-05-31 | Should a post-v1 roadmap be published? | Owner | No | Open | TBD. Candidates: custom domain, CI/CD, cloud sync, authentication, team conversations. |
+| Q-073 | 2026-05-31 | Should the project become a portfolio centerpiece (GitHub README, case study site, etc.)? | Owner | No | Open | TBD. The portfolio assets folder contains a case study, architecture overview, demo script, lessons learned, and release notes ready for publication. |

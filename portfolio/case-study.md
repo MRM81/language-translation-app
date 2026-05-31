@@ -2,14 +2,21 @@
 
 ## 1. Project Overview
 
-My Translation App is a browser-based translation tool that lets users translate typed text or short spoken recordings between languages. The project was built sprint-by-sprint from architecture through to a polished, portfolio-ready MVP.
+My Translation App is a browser-based translation tool that lets users translate typed text or short spoken recordings between 37 languages. The project was built sprint-by-sprint across 19 sprints, from architecture through to a polished, portfolio-ready v1.0 release deployed on AWS.
 
 **Core capabilities:**
 - Text translation via typed input
 - Audio translation via push-to-talk recording (Chrome, Edge, Firefox)
 - Audio translation via file upload (fallback)
 - Text-to-speech playback of translated output
-- Ten supported languages at launch
+- Conversation Mode — turn-based bilingual conversation with auto-play
+- Push-To-Talk in Conversation Mode
+- Multi-conversation management with naming, search, and switching
+- Conversation persistence (localStorage)
+- Export — TXT, JSON, clipboard
+- 37 supported languages
+- Landing page with product branding
+- Live production deployment (AWS S3 + CloudFront + Elastic Beanstalk)
 
 **Target context:** Real-world in-person communication — a traveller or professional needing quick, spoken translation without installing a native app.
 
@@ -23,9 +30,11 @@ My Translation App is a browser-based translation tool that lets users translate
 | Styling | Plain CSS with custom properties (no UI framework) |
 | Backend | .NET 8 LTS (ASP.NET Core) |
 | Text translation | Azure Translator (SDK 1.0.0, API v3.0) |
-| Speech-to-text | Azure Speech SDK 1.50.0 (WAV path) + Fast Transcription REST API (MP3/WebM/OGG) |
+| Speech-to-text | Azure Speech SDK 1.50.0 (WAV) + Fast Transcription REST API (MP3/WebM/OGG) |
 | Text-to-speech | Azure Speech SDK 1.50.0 (`Audio24Khz96KBitRateMonoMp3`) |
-| Testing | xUnit (.NET) — 71 tests |
+| Hosting — Frontend | AWS S3 + CloudFront (HTTPS, global CDN) |
+| Hosting — Backend | AWS Elastic Beanstalk (SingleInstance, .NET 8 on AL2023) |
+| Testing | xUnit (.NET) — 133 tests |
 | Build | Vite (`npm run build`), `dotnet build` |
 
 ---
@@ -37,16 +46,42 @@ My Translation App is a browser-based translation tool that lets users translate
 The backend is built around a provider abstraction layer. Three interfaces live in the Application layer:
 
 ```
-ISpeechToTextProvider   — transcribes audio to text
+ISpeechToTextProvider    — transcribes audio to text
 ITextTranslationProvider — translates text between languages
-ITextToSpeechProvider   — synthesizes speech from text
+ITextToSpeechProvider    — synthesizes speech from text
 ```
 
-Azure adapters implement these interfaces in the Infrastructure layer. The Application layer has zero Azure SDK references. This means a future provider swap (OpenAI, DeepL, Google) requires only Infrastructure changes — no Application or API changes.
+Azure adapters implement these interfaces in the Infrastructure layer. The Application layer has zero Azure SDK references. A future provider swap (OpenAI, DeepL, Google) requires only Infrastructure changes — no Application or API changes.
 
 ### Configuration-Driven Provider Switching
 
-Provider selection is controlled by a single config key: `Translation:Provider = "Mock" | "Azure"`. Mock mode requires no credentials and is the safe default. Azure mode is opted into explicitly via User Secrets or environment variables.
+Provider selection is controlled by a single config key: `Translation:Provider = "Mock" | "Azure"`. Mock mode requires no credentials. Azure mode is opted into explicitly via User Secrets or environment variables.
+
+### AWS Deployment Pattern — Same-Origin Proxy
+
+Browser calls go to CloudFront (HTTPS) at a single domain. CloudFront routes `/api/*` to Elastic Beanstalk and `/*` to S3. This eliminates mixed-content errors (EB is HTTP-only), avoids cross-origin CORS on browser fetch calls, and keeps the EB URL private.
+
+```
+Browser  →  CloudFront (HTTPS)
+               ├─ /api/*   →  Elastic Beanstalk (HTTP, private)
+               └─ /*       →  S3 (static assets)
+```
+
+### Conversation Mode Architecture
+
+Conversation Mode is a pure frontend orchestration layer — no new backend endpoints. It reuses all three existing API calls (`translateText`, `translateAudio`, `synthesizeSpeech`) to create a turn-based bilingual conversation experience. Conversations persist in `localStorage` and survive page refresh.
+
+### Frontend Navigation Model
+
+Sprint 018 introduced a three-state navigation model without a routing library:
+
+```typescript
+screen: 'landing' | 'workspace'
+workspaceMode: 'translate' | 'conversation'
+translationInputMode: 'text' | 'audio'
+```
+
+The landing page is the default entry point. The workspace preserves all existing mode navigation.
 
 ### Security Posture
 
@@ -55,32 +90,33 @@ Provider selection is controlled by a single config key: `Translation:Provider =
 - Correlation IDs and timing metrics are safe to log.
 - Structured error envelope — no stack traces or provider messages exposed to the browser.
 
-### Frontend Architecture
-
-- React Context for session state
-- `services/api/` layer isolates all backend HTTP calls — components never call the backend directly
-- TypeScript interfaces in `types/api.ts` mirror backend DTOs field-for-field
-- Vite dev proxy eliminates CORS in development
-
 ---
 
 ## 4. Key Technical Challenges
 
 ### GStreamer Dependency Eliminated (Sprint 005.2)
 
-The Azure Speech SDK's compressed-audio push-stream path requires GStreamer on Windows — unavailable on standard dev machines. The solution was to route all compressed audio (MP3, WebM, OGG) through the Azure Speech **Fast Transcription REST API** (`/speechtotext/transcriptions:transcribe?api-version=2025-10-15`) which handles codec decoding server-side. WAV remained on the SDK path. No native codec dependencies remain.
+The Azure Speech SDK's compressed-audio push-stream path requires GStreamer on Windows. The solution was to route all compressed audio (MP3, WebM, OGG) through the Azure Speech **Fast Transcription REST API** (`api-version=2025-10-15`), which handles codec decoding server-side. WAV remained on the SDK path. No native codec dependencies remain.
 
 ### Azure SDK Version Conflict (Sprint 005.1)
 
-`Azure.AI.Translation.Text` 2.0.0 targets API version `2026-06-06`, which is not exposed by standard Azure AI Services multi-service resources. These resources only expose Translator at the v3.0 path. The fix was to pin to SDK 1.0.0 (Translator API v3.0), which is compatible with all standard Azure resources.
+`Azure.AI.Translation.Text` 2.0.0 targets API version `2026-06-06`, not available on standard Azure AI Services resources. Pinned to SDK 1.0.0 (Translator API v3.0).
 
 ### Binary TTS Response — Correlation ID via Header
 
-The TTS endpoint returns raw binary audio in its response body. A JSON correlation ID cannot be embedded in a binary response body. The solution was to return the correlation ID in the `X-Correlation-ID` response header — consistent with the existing middleware convention for inbound correlation IDs.
+The TTS endpoint returns raw binary audio. The correlation ID is returned in the `X-Correlation-ID` response header — consistent with the existing middleware convention.
 
 ### Content-Type Guard on Fetch Error Paths
 
-A post-Sprint-007 defect: the `synthesizeSpeech` fetch helper called `res.json()` unconditionally in the error path. When the error response body was non-JSON (proxy error, empty body), `res.json()` threw a browser `SyntaxError` that leaked through to the UI as a raw JS engine error string. The fix: check `Content-Type` header before calling `res.json()` in the error path. The `ResultPanel` catch block was hardened to discriminate on `apiErr?.errorCode` before writing any message to the UI.
+A post-Sprint-007 defect: `synthesizeSpeech` called `res.json()` unconditionally in the error path. When the error body was non-JSON (proxy error, empty body), a raw JS engine `SyntaxError` leaked to the UI. Fix: check `Content-Type` before calling `.json()` in error paths.
+
+### Conversation State Management (Sprints 013–017)
+
+Conversation Mode introduced multi-level state: active speaker, message history, language pair, auto-play setting, conversation identity, and search filter. All state is managed in `ConversationMode.tsx` with no new backend surface. The storage migration path (single conversation → multi-conversation store) was designed to be non-destructive — legacy data is migrated once and removed only after the new store saves successfully.
+
+### Cross-Cloud Deployment (Sprint 012)
+
+Running Azure AI services through an AWS-hosted backend required careful configuration of CloudFront origin headers. Azure credentials are held exclusively in EB environment properties. The browser never calls Azure directly.
 
 ---
 
@@ -88,11 +124,14 @@ A post-Sprint-007 defect: the `synthesizeSpeech` fetch helper called `res.json()
 
 | Decision | Rationale |
 |---|---|
-| Push-to-talk (press to start, press to stop) | Lower complexity than hold-to-record. No continuous listening. Aligns with the MVP domain model. |
-| On-demand TTS playback | Avoids generating speech audio on every translation (cost and latency). Gives users control. |
-| Runtime MIME detection | `MediaRecorder.isTypeSupported()` selects the best format per browser at runtime. No hardcoded format. |
-| File upload as fallback tab | Useful for testing with known audio files and for users with pre-recorded content. Adds negligible scope. |
-| Structured error display | Correlation ID shown in error panel lets users report specific failures for support. |
+| Push-to-talk (press to start, press to stop) | Lower complexity than hold-to-record. Aligns with the MVP domain model. |
+| On-demand TTS playback | Avoids generating speech on every translation. Gives users control. |
+| Runtime MIME detection | `MediaRecorder.isTypeSupported()` selects the best format per browser at runtime. |
+| Conversation Mode as frontend orchestration | Reuses all three existing API endpoints. Zero new backend surface. |
+| Auto-play on in Conversation Mode by default | Core UX expectation for conversational translation. Toggle available. |
+| localStorage persistence | Zero-account, zero-database architecture maintained through v1. |
+| Landing page as first screen | Portfolio-quality first impression. Workspace is not the right entry point for a polished product. |
+| Text / Audio segmented toggle | Showing both forms simultaneously creates clutter. One visible at a time is cleaner. |
 
 ---
 
@@ -101,33 +140,56 @@ A post-Sprint-007 defect: the `synthesizeSpeech` fetch helper called `res.json()
 | Sprint | Delivered |
 |---|---|
 | 001 | Discovery Architecture — MVP scope, domain model, decisions, risks, questions |
-| 002 | Implementation Architecture — folder structures, provider interfaces, API boundaries, sequencing |
+| 002 | Implementation Architecture — folder structures, provider interfaces, API boundaries |
 | 003 | Backend API Skeleton — .NET 8, DTOs, mock providers, validation, 30 tests |
-| 004 | Frontend MVP Shell — React + TypeScript + Vite, language loading, text/audio forms, result/error panels |
-| 005 | Azure Provider Integration — Azure Translator + Speech-to-Text adapters, config-driven switching, 45 tests |
-| 005.2 | Audio Format Compatibility Fix — Fast Transcription REST API, GStreamer eliminated, 61 tests |
-| 006 | Push-to-Talk — MediaRecorder, push-to-talk UX, three-state button, recording indicator and timer, 61 tests |
-| 007 | Text-to-Speech Playback — Azure TTS provider, Play button, four-state UI, object URL cleanup, 71 tests |
-| 008 | UX Modernization — dark theme, responsive design, accessibility, portfolio documentation |
+| 004 | Frontend MVP Shell — React + TypeScript + Vite, language loading, text/audio forms |
+| 005 | Azure Provider Integration — Azure Translator + Speech-to-Text, config-driven switching |
+| 005.2 | Audio Format Compatibility Fix — Fast Transcription REST API, GStreamer eliminated |
+| 006 | Push-to-Talk — MediaRecorder, three-state button, recording indicator and timer |
+| 007 | Text-to-Speech Playback — Azure TTS provider, four-state Play button |
+| 008 | UX Modernization — dark theme, responsive design, accessibility |
+| 009A | Language Catalog Expansion — 10 → 37 languages |
+| 009B | Language Capability Metadata — per-language TTS support flags |
+| 010 | Deployment Readiness Hardening — health endpoint, config-driven CORS |
+| 011 | AWS Deployment Preparation — `VITE_API_BASE_URL`, deployment docs |
+| 012 | AWS Production Deployment — S3 + CloudFront + Elastic Beanstalk, live |
+| 013 | Conversation Mode — turn-based bilingual conversation, auto-play |
+| 014 | Push-To-Talk in Conversation Mode |
+| 015 | Conversation Persistence & Export — localStorage, TXT/JSON/clipboard |
+| 016 | Multi-Conversation Management — named conversations, rename, delete, switch |
+| 017 | Conversation Search & Demo Polish — title + full message text search, auto-title |
+| 018 | UI/UX Redesign — landing page, logo, favicon, translation toggle, workspace header |
+| 019 | Production Refresh & Portfolio Assets — v1.0 release |
 
 ---
 
-## 7. Lessons Learned
+## 7. Results
+
+- **133 automated tests** — all passing at v1.0
+- **37 languages** supported
+- **Live production deployment** on AWS (CloudFront + Elastic Beanstalk + S3)
+- **Zero third-party UI libraries** — all styling in plain CSS
+- **Zero authentication** required — zero friction entry point
+- **Zero database** — localStorage covers v1 persistence requirements
+
+---
+
+## 8. Lessons Learned
 
 See `portfolio/lessons-learned.md` for the full sprint-by-sprint retrospective.
 
 ---
 
-## 8. Future Roadmap
+## 9. Post-v1 Roadmap
 
-Candidates for Sprint 009+:
+Potential future enhancements:
 
-| Feature | Rationale |
+| Feature | Notes |
 |---|---|
-| Deployment (Azure App Service or Vercel + Railway) | Q-006, Q-014 — hosting target not yet decided |
-| Session translation history | Q-005, Q-019 — current session display, no persistence |
-| Auto language detection | Q-008, Q-026 — source language auto-detect via Azure |
-| Dark mode toggle | Q-032 — user-selectable, Sprint 008 establishes the CSS variable foundation |
-| Audio duration enforcement | R-016, Q-015 — exact 60s enforcement via NAudio |
-| Rate limiting | R-004, R-014 — per-IP request limits to control Azure costs |
-| CI/CD pipeline | Q-024 — automated tests + deployment on merge |
+| Custom domain | Route 53 + ACM certificate |
+| Route-based navigation | Deep-linking, back-button behaviour |
+| Real-time speech translation | Continuous listening — architectural uplift required |
+| Cloud sync | Requires authentication and backend persistence |
+| User accounts | Authentication layer |
+| CI/CD pipeline | GitHub Actions or AWS CodePipeline |
+| Team conversations | Shared conversation sessions |
